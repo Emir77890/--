@@ -4,11 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blade Clicker</title>
-
 <style>
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   background:#0b0b0b;
   color:#fff;
   text-align:center;
@@ -16,33 +15,37 @@ body{
 h1{color:#ff4444}
 #game,#skins{display:none}
 button{
-  padding:15px 25px;
-  margin:10px;
-  font-size:16px;
+  padding:14px 22px;
+  margin:8px;
   border:none;
-  border-radius:10px;
+  border-radius:12px;
   background:#1e1e1e;
   color:#fff;
+  font-size:16px;
+  cursor:pointer;
 }
 #blade{
-  width:120px;
-  height:120px;
+  width:160px;
+  height:160px;
   margin:20px auto;
-  border-radius:20px;
+  border-radius:30px;
   background:red;
-  box-shadow:0 0 20px red;
+  box-shadow:0 0 30px red;
+  cursor:pointer;
+  transition:.1s;
 }
+#blade:active{transform:scale(.9);}
 .skin{
   width:60px;
   height:60px;
+  border-radius:12px;
   display:inline-block;
-  margin:10px;
-  border-radius:10px;
+  margin:8px;
+  border:2px solid #444;
   cursor:pointer;
 }
 </style>
 </head>
-
 <body>
 
 <div id="menu">
@@ -52,67 +55,74 @@ button{
 </div>
 
 <div id="game">
-  <h2>Уровень: <span id="level">1</span></h2>
   <h3>Золото: <span id="gold">0</span></h3>
+  <h3>Сила: <span id="power">1</span></h3>
 
-  <div id="blade" onclick="hit()"></div>
+  <div id="blade"></div>
 
-  <button onclick="upgrade()">Улучшить (+1 золото) – <span id="price">10</span></button>
+  <button onclick="upgrade()">Улучшить — <span id="price">10</span></button>
   <br>
   <button onclick="back()">Назад</button>
 </div>
 
 <div id="skins">
-  <h2>Скины мечей</h2>
+  <h2>Скины</h2>
+
+  <!-- бесплатные -->
   <div class="skin" style="background:red" onclick="setSkin('red')"></div>
   <div class="skin" style="background:blue" onclick="setSkin('blue')"></div>
+  <div class="skin" style="background:green" onclick="setSkin('green')"></div>
   <div class="skin" style="background:purple" onclick="setSkin('purple')"></div>
+
+  <!-- платные -->
+  <div class="skin" style="background:gold" onclick="buySkin('gold',300)"></div>
+  <div class="skin" style="background:linear-gradient(45deg,red,yellow)" onclick="buySkin('fire',500)"></div>
+  <div class="skin" style="background:linear-gradient(45deg,blue,cyan)" onclick="buySkin('ice',500)"></div>
+  <div class="skin" style="background:#00ffcc;box-shadow:0 0 15px #00ffcc" onclick="buySkin('neon',800)"></div>
+
   <br>
   <button onclick="back()">Назад</button>
 </div>
 
 <script>
-let gold = Number(localStorage.gold) || 0;
-let level = Number(localStorage.level) || 1;
-let power = Number(localStorage.power) || 1;
-let price = Number(localStorage.price) || 10;
-let skin = localStorage.skin || "red";
+// Переменные
+let gold = Number(localStorage.getItem('gold')) || 0;
+let power = Number(localStorage.getItem('power')) || 1;
+let price = Number(localStorage.getItem('price')) || 10;
+let skin = localStorage.getItem('skin') || "red";
+let owned = JSON.parse(localStorage.getItem('owned') || '["red","blue","green","purple"]');
 
+// Элементы
 const goldEl = document.getElementById("gold");
-const levelEl = document.getElementById("level");
+const powerEl = document.getElementById("power");
 const priceEl = document.getElementById("price");
 const blade = document.getElementById("blade");
+const menu = document.getElementById("menu");
+const game = document.getElementById("game");
+const skins = document.getElementById("skins");
 
-function save(){
-  localStorage.gold = gold;
-  localStorage.level = level;
-  localStorage.power = power;
-  localStorage.price = price;
-  localStorage.skin = skin;
-}
-
-function start(){
-  menu.style.display="none";
-  skins.style.display="none";
-  game.style.display="block";
-  update();
-}
-
-function back(){
-  game.style.display="none";
-  skins.style.display="none";
-  menu.style.display="block";
-}
-
-function hit(){
+// Клик на меч
+blade.addEventListener('click', () => {
   gold += power;
-  if(gold >= level * 50){
-    level++;
-  }
   update();
   save();
+});
+
+// Сохранение
+function save(){
+  localStorage.setItem('gold', gold);
+  localStorage.setItem('power', power);
+  localStorage.setItem('price', price);
+  localStorage.setItem('skin', skin);
+  localStorage.setItem('owned', JSON.stringify(owned));
 }
 
+// Меню
+function start(){menu.style.display="none"; game.style.display="block"; update();}
+function back(){game.style.display=skins.style.display="none"; menu.style.display="block";}
+function openSkins(){menu.style.display="none"; skins.style.display="block";}
+
+// Улучшение
 function upgrade(){
   if(gold >= price){
     gold -= price;
@@ -123,23 +133,23 @@ function upgrade(){
   }
 }
 
-function openSkins(){
-  menu.style.display="none";
-  skins.style.display="block";
-}
+// Скины
+function setSkin(s){if(owned.includes(s)){skin=s;update();save();}}
+function buySkin(s,c){if(!owned.includes(s) && gold>=c){gold-=c;owned.push(s);skin=s;update();save();}}
 
-function setSkin(c){
-  skin = c;
-  update();
-  save();
-}
-
+// Обновление
 function update(){
   goldEl.textContent = gold;
-  levelEl.textContent = level;
+  powerEl.textContent = power;
   priceEl.textContent = price;
-  blade.style.background = skin;
-  blade.style.boxShadow = "0 0 20px " + skin;
+
+  blade.style.background =
+    skin==="fire" ? "linear-gradient(45deg,red,yellow)" :
+    skin==="ice" ? "linear-gradient(45deg,blue,cyan)" :
+    skin==="neon" ? "#00ffcc" :
+    skin;
+
+  blade.style.boxShadow = "0 0 30px "+(skin==="neon"?"#00ffcc":skin);
 }
 
 update();
