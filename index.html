@@ -5,155 +5,208 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blade Clicker</title>
 <style>
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#0b0b0b;
-  color:#fff;
-  text-align:center;
-}
-h1{color:#ff4444}
-#game,#skins{display:none}
-button{
-  padding:14px 22px;
-  margin:8px;
-  border:none;
-  border-radius:12px;
-  background:#1e1e1e;
-  color:#fff;
-  font-size:16px;
-  cursor:pointer;
-}
-#blade{
-  width:160px;
-  height:160px;
-  margin:20px auto;
-  border-radius:30px;
-  background:red;
-  box-shadow:0 0 30px red;
-  cursor:pointer;
-  transition:.1s;
-}
-#blade:active{transform:scale(.9);}
-.skin{
-  width:60px;
-  height:60px;
-  border-radius:12px;
-  display:inline-block;
-  margin:8px;
-  border:2px solid #444;
-  cursor:pointer;
-}
+body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial,sans-serif;text-align:center;}
+h1{color:#ff4444;}
+button{padding:12px 20px;margin:6px;font-size:16px;border:none;border-radius:10px;background:#1e1e1e;color:#fff;cursor:pointer;}
+#menu,#game,#shop,#profile{display:none;}
+#blade{width:160px;height:160px;margin:20px auto;border-radius:30px;background:red;box-shadow:0 0 25px red;cursor:pointer;}
+#blade:active{transform:scale(.92);}
+.bottom-medal{position:fixed;bottom:0;left:0;right:0;background:#111;padding:8px;font-size:14px;border-top:1px solid #333;}
+.skin{width:50px;height:50px;display:inline-block;margin:4px;border-radius:10px;cursor:pointer;border:2px solid #333;}
+.skin.selected{border-color:#00ffcc;}
+.section{margin:10px 0;}
 </style>
 </head>
 <body>
 
 <div id="menu">
   <h1>Blade Clicker</h1>
-  <button onclick="start()">Играть</button>
-  <button onclick="openSkins()">Скины</button>
+  <button onclick="openGame()">Играть</button>
+  <button onclick="openShop()">Магазин</button>
+  <button onclick="openProfile()">Профиль</button>
 </div>
 
 <div id="game">
   <h3>Золото: <span id="gold">0</span></h3>
   <h3>Сила: <span id="power">1</span></h3>
-
   <div id="blade"></div>
-
-  <button onclick="upgrade()">Улучшить — <span id="price">10</span></button>
-  <br>
+  <button onclick="upgrade()">Улучшить (+1 сила, <span id="price">10</span> золота)</button><br>
   <button onclick="back()">Назад</button>
 </div>
 
-<div id="skins">
-  <h2>Скины</h2>
+<div id="shop">
+  <h2>Магазин</h2>
 
-  <!-- бесплатные -->
-  <div class="skin" style="background:red" onclick="setSkin('red')"></div>
-  <div class="skin" style="background:blue" onclick="setSkin('blue')"></div>
-  <div class="skin" style="background:green" onclick="setSkin('green')"></div>
-  <div class="skin" style="background:purple" onclick="setSkin('purple')"></div>
+  <div class="section">
+    <h3>Скины за золото</h3>
+    <p>💪 +5 силы — 100 золота</p>
+    <button onclick="buyPower(5,100)">Купить</button><br>
+    <p>Скины:</p>
+    <div id="goldSkinsContainer"></div>
+  </div>
 
-  <!-- платные -->
-  <div class="skin" style="background:gold" onclick="buySkin('gold',300)"></div>
-  <div class="skin" style="background:linear-gradient(45deg,red,yellow)" onclick="buySkin('fire',500)"></div>
-  <div class="skin" style="background:linear-gradient(45deg,blue,cyan)" onclick="buySkin('ice',500)"></div>
-  <div class="skin" style="background:#00ffcc;box-shadow:0 0 15px #00ffcc" onclick="buySkin('neon',800)"></div>
+  <div class="section">
+    <h3>Скины за медальку (дают бонус к силе)</h3>
+    <div id="medalSkinsContainer"></div>
+  </div>
 
-  <br>
+  <br><button onclick="back()">Назад</button>
+</div>
+
+<div id="profile">
+  <h2>Профиль</h2>
+  <p>💰 Золото: <span id="pGold">0</span></p>
+  <p>⚔️ Сила: <span id="pPower">1</span></p>
+  <h3>Медалька за силу:</h3>
+  <p id="pMedal">Нет медальки</p>
   <button onclick="back()">Назад</button>
 </div>
+
+<div class="bottom-medal" id="bottomMedal">🏅 Нет медальки</div>
 
 <script>
-// Переменные
-let gold = Number(localStorage.getItem('gold')) || 0;
-let power = Number(localStorage.getItem('power')) || 1;
-let price = Number(localStorage.getItem('price')) || 10;
-let skin = localStorage.getItem('skin') || "red";
-let owned = JSON.parse(localStorage.getItem('owned') || '["red","blue","green","purple"]');
+let gold = +localStorage.gold || 0;
+let power = +localStorage.power || 1;
+let price = +localStorage.price || 10;
+let skin = localStorage.skin || "red";
+let bonusPower = +localStorage.bonusPower || 0;
 
-// Элементы
-const goldEl = document.getElementById("gold");
-const powerEl = document.getElementById("power");
-const priceEl = document.getElementById("price");
 const blade = document.getElementById("blade");
-const menu = document.getElementById("menu");
-const game = document.getElementById("game");
-const skins = document.getElementById("skins");
+const goldContainer = document.getElementById("goldSkinsContainer");
+const medalContainer = document.getElementById("medalSkinsContainer");
 
-// Клик на меч
-blade.addEventListener('click', () => {
-  gold += power;
-  update();
-  save();
+// Скины за золото
+const goldSkins = [
+  {color:"blue", cost:200},
+  {color:"purple", cost:300},
+  {color:"orange", cost:400},
+  {color:"green", cost:250},
+  {color:"pink", cost:350}
+];
+
+// Скины за медальку с бонусом к силе
+const medalSkins = [
+  {color:"#FFD700", medal:100, bonus:2},
+  {color:"#C0C0C0", medal:250, bonus:3},
+  {color:"#CD7F32", medal:400, bonus:4},
+  {color:"#00FFFF", medal:550, bonus:5},
+  {color:"#8A2BE2", medal:700, bonus:6},
+  {color:"#FF4500", medal:850, bonus:7},
+  {color:"#32CD32", medal:1000, bonus:8},
+  {color:"#FF69B4", medal:1150, bonus:9},
+  {color:"#1E90FF", medal:1300, bonus:10},
+  {color:"#DA70D6", medal:1450, bonus:12},
+  {color:"#00FF7F", medal:1600, bonus:15},
+  {color:"#FF8C00", medal:1750, bonus:15},
+  {color:"#7FFF00", medal:1900, bonus:18},
+  {color:"#00CED1", medal:2050, bonus:20},
+  {color:"#FF1493", medal:2200, bonus:20},
+  {color:"#ADFF2F", medal:2350, bonus:22},
+  {color:"#FF6347", medal:2500, bonus:25},
+  {color:"#40E0D0", medal:2650, bonus:25},
+  {color:"#BA55D3", medal:2800, bonus:28},
+  {color:"#FFDAB9", medal:3000, bonus:30}
+];
+
+// Создаем скины за золото
+goldSkins.forEach(s=>{
+  const div=document.createElement("div");
+  div.className="skin";
+  div.style.background=s.color;
+  div.title=`${s.color.toUpperCase()} — ${s.cost} золота`;
+  div.onclick=()=>buySkin(s.color,s.cost,0);
+  goldContainer.appendChild(div);
 });
 
-// Сохранение
-function save(){
-  localStorage.setItem('gold', gold);
-  localStorage.setItem('power', power);
-  localStorage.setItem('price', price);
-  localStorage.setItem('skin', skin);
-  localStorage.setItem('owned', JSON.stringify(owned));
-}
+// Создаем скины за медальку
+medalSkins.forEach(s=>{
+  const div=document.createElement("div");
+  div.className="skin";
+  div.style.background=s.color;
+  div.title=`${s.color.toUpperCase()} — нужно ${s.medal} силы (+${s.bonus} к силе)`;
+  div.onclick=()=>{if(power>=s.medal){skin=s.color; bonusPower=s.bonus; save(); update();} else {alert("Недостаточно силы для этой медали");}};
+  medalContainer.appendChild(div);
+});
 
-// Меню
-function start(){menu.style.display="none"; game.style.display="block"; update();}
-function back(){game.style.display=skins.style.display="none"; menu.style.display="block";}
-function openSkins(){menu.style.display="none"; skins.style.display="block";}
+blade.onclick = ()=>{
+  gold += power + bonusPower;
+  checkMedal();
+  save();
+  update();
+};
 
-// Улучшение
 function upgrade(){
-  if(gold >= price){
-    gold -= price;
+  if(gold>=price){
+    gold-=price;
     power++;
-    price += 10;
-    update();
+    checkMedal();
     save();
+    update();
   }
 }
 
-// Скины
-function setSkin(s){if(owned.includes(s)){skin=s;update();save();}}
-function buySkin(s,c){if(!owned.includes(s) && gold>=c){gold-=c;owned.push(s);skin=s;update();save();}}
-
-// Обновление
-function update(){
-  goldEl.textContent = gold;
-  powerEl.textContent = power;
-  priceEl.textContent = price;
-
-  blade.style.background =
-    skin==="fire" ? "linear-gradient(45deg,red,yellow)" :
-    skin==="ice" ? "linear-gradient(45deg,blue,cyan)" :
-    skin==="neon" ? "#00ffcc" :
-    skin;
-
-  blade.style.boxShadow = "0 0 30px "+(skin==="neon"?"#00ffcc":skin);
+function buyPower(add,cost){
+  if(gold<cost){alert("Не хватает золота"); return;}
+  gold-=cost;
+  power+=add;
+  checkMedal();
+  save();
+  update();
 }
 
-update();
-</script>
+function buySkin(s,cost,bonus){
+  if(cost>0 && gold<cost){alert("Не хватает золота"); return;}
+  gold-=cost;
+  skin=s;
+  if(bonus) bonusPower=bonus;
+  save();
+  update();
+}
 
+function checkMedal(){
+  let m="Нет медальки";
+  if(power>=100)m="🥉 Бронза (100 силы)";
+  if(power>=250)m="🥈 Серебро (250 силы)";
+  if(power>=400)m="👑 Легенда (400 силы)";
+  if(power>=550)m="⚔️ Мастер (550 силы)";
+  if(power>=1000)m="💠 Элита (1000 силы)";
+  document.getElementById("bottomMedal").textContent="🏅 "+m;
+  document.getElementById("pMedal").textContent=m;
+}
+
+function save(){
+  localStorage.gold=gold;
+  localStorage.power=power;
+  localStorage.price=price;
+  localStorage.skin=skin;
+  localStorage.bonusPower=bonusPower;
+}
+
+function update(){
+  document.getElementById("gold").textContent=gold;
+  document.getElementById("power").textContent=power;
+  document.getElementById("price").textContent=price;
+  document.getElementById("pGold").textContent=gold;
+  document.getElementById("pPower").textContent=power;
+  blade.style.background=skin;
+  blade.style.boxShadow="0 0 25px "+skin;
+
+  document.querySelectorAll(".skin").forEach(div=>{
+    div.classList.remove("selected");
+    if(div.style.background===skin) div.classList.add("selected");
+  });
+}
+
+function hideAll(){menu.style.display=game.style.display=shop.style.display=profile.style.display="none";}
+function openGame(){hideAll();game.style.display="block";}
+function openShop(){hideAll();shop.style.display="block";}
+function openProfile(){hideAll();profile.style.display="block";}
+function back(){hideAll();menu.style.display="block";}
+
+update();
+checkMedal();
+hideAll();
+menu.style.display="block";
+</script>
 </body>
 </html>
