@@ -3,61 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blade Clicker VIP</title>
+<title>Blade Clicker 25 животных</title>
 <style>
-body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial,sans-serif;text-align:center;}
-button{padding:10px 18px;margin:5px;font-size:16px;border:none;border-radius:10px;background:#1e1e1e;color:#fff;cursor:pointer;}
+body{margin:0;padding:0;background:#0b0b0b;color:#fff;font-family:Arial,sans-serif;text-align:center;}
+button{padding:12px 18px;margin:5px;font-size:16px;border:none;border-radius:12px;background:#1e1e1e;color:#fff;cursor:pointer;}
 #login,#menu,#game,#shop,#profile,#admin,#vipPanel{display:none;}
-#blade{width:160px;height:160px;margin:20px auto;border-radius:30px;background:red;box-shadow:0 0 25px red;cursor:pointer;font-size:80px;display:flex;align-items:center;justify-content:center;}
+#blade{width:160px;height:160px;margin:20px auto;border-radius:30px;background:#ff4444;box-shadow:0 0 25px #ff4444;cursor:pointer;font-size:80px;display:flex;align-items:center;justify-content:center;}
 #blade:active{transform:scale(.92);}
 .skin{width:60px;height:60px;display:inline-flex;align-items:center;justify-content:center;margin:5px;border-radius:12px;cursor:pointer;border:3px solid #333;font-size:32px;}
 .skin.selected{box-shadow:0 0 10px #fff;}
+.skin.common{border-color:#2ecc71;}
+.skin.rare{border-color:#3498db;}
+.skin.epic{border-color:#9b59b6;}
+.skin.legendary{border-color:#f39c12;}
 .section{margin:15px 0;}
 .bottom-medal{position:fixed;bottom:0;left:0;right:0;background:#111;padding:8px;font-size:14px;border-top:1px solid #333;}
-input{padding:6px;border-radius:6px;border:none;margin:4px;}
+input{padding:6px;border-radius:6px;border:none;margin:4px;width:80%;}
+#miniIphone{margin-top:30px;display:flex;justify-content:center;}
+.mini-phone{width:200px;height:400px;background:#111;border:4px solid #333;border-radius:40px;padding:10px;box-shadow:0 0 15px #000;display:flex;flex-direction:column;align-items:center;}
+.mini-screen{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-gap:6px;padding:5px;width:100%;}
+.mini-screen button{border:none;border-radius:10px;background:#222;color:#fff;font-size:12px;padding:6px;}
+.yui {
+  background-color: red;
+}
 </style>
 </head>
 <body>
 
 <!-- Регистрация -->
 <div id="login">
-  <h2>Введите никнейм</h2>
-  <input id="nickInput" placeholder="Ник">
-  <button onclick="login()">Играть</button>
+<h2>Введите никнейм</h2>
+<input id="nickInput" placeholder="Ник">
+<button onclick="login()">Играть</button>
 </div>
 
 <!-- Меню -->
 <div id="menu">
-<h1>Blade Clicker VIP</h1>
+<h1 class="yui">Blade Clicker </h1>
 <button onclick="openGame()">Играть</button>
 <button onclick="openShop()">Магазин</button>
 <button onclick="openProfile()">Профиль</button>
 <button onclick="openVIP()">VIP Панель</button>
 <button onclick="openAdmin()">Админ</button>
-<!-- Вставляем в <div id="menu"> внизу -->
-<div id="miniIphone" style="margin-top:30px; display:flex; justify-content:center;">
-  <div style="width:200px; height:400px; background:#111; border:4px solid #333; border-radius:40px; padding:10px; box-shadow:0 0 15px #000; display:flex; flex-direction:column; align-items:center;">
-    <!-- динамик сверху -->
-    <div style="width:60px; height:6px; background:#555; border-radius:3px; margin-bottom:10px;"></div>
-    <!-- сетка игр -->
-    <div style="flex:1; display:grid; grid-template-columns:repeat(3,1fr); grid-gap:8px; padding:5px; width:100%;">
-      <button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame1','_blank')" style="border:none; border-radius:12px; background:#222; color:#fff; font-size:12px;">🎮 Игра 1</button>
-      <button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame2','_blank')" style="border:none; border-radius:12px; background:#222; color:#fff; font-size:12px;">🕹️ Игра 2</button>
-      <button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame3','_blank')" style="border:none; border-radius:12px; background:#222; color:#fff; font-size:12px;">🧩 Игра 3</button>
-      <button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame4','_blank')" style="border:none; border-radius:12px; background:#222; color:#fff; font-size:12px;">⚡ Игра 4</button>
-      <button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame5','_blank')" style="border:none; border-radius:12px; background:#222; color:#fff; font-size:12px;">🏎️ Игра 5</button>
-      <button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame6','_blank')" style="border:none; border-radius:12px; background:#222; color:#fff; font-size:12px;">🛡️ Игра 6</button>
-      <button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame7','_blank')" style="border:none; border-radius:12px; background:#222; color:#fff; font-size:12px;">🧙 Игра 7</button>
-      <button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame8','_blank')" style="border:none; border-radius:12px; background:#222; color:#fff; font-size:12px;">🎯 Игра 8</button>
-      <button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame9','_blank')" style="border:none; border-radius:12px; background:#222; color:#fff; font-size:12px;">🏹 Игра 9</button>
-      <button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame10','_blank')" style="border:none; border-radius:12px; background:#222; color:#fff; font-size:12px;">🧟 Игра 10</button>
-    </div>
-    <!-- кнопка Home -->
-    <div style="width:40px; height:40px; background:#222; border-radius:50%; margin-top:8px;"></div>
-  </div>
+<div id="miniIphone">
+<div class="mini-phone">
+<div style="width:60px;height:6px;background:#555;border-radius:3px;margin-bottom:10px;"></div>
+<div class="mini-screen">
+<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame1','_blank')">🎮 Игра1</button>
+<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame2','_blank')">🕹️ Игра2</button>
+<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame3','_blank')">🧩 Игра3</button>
+<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame4','_blank')">⚡ Игра4</button>
+<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame5','_blank')">🏎️ Игра5</button>
+<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame6','_blank')">🛡️ Игра6</button>
+<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame7','_blank')">🧙 Игра7</button>
+<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame8','_blank')">🎯 Игра8</button>
+<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame9','_blank')">🏹 Игра9</button>
+</div>
+<div style="width:40px;height:40px;background:#222;border-radius:50%;margin-top:8px;"></div>
+</div>
+</div>
 </div>
 
-</div>
 
 <!-- Игровой экран -->
 <div id="game">
@@ -70,14 +76,14 @@ input{padding:6px;border-radius:6px;border:none;margin:4px;}
 
 <!-- Магазин -->
 <div id="shop">
-<h2>🐾 Животные (скины)</h2>
+<h2>🐾 Магазин животных</h2>
 <div id="skins"></div>
 <div class="section">
 <h3>🎁 Кейсы</h3>
 <button onclick="openCase('common')">Обычный (500💰)</button>
 <button onclick="openCase('rare')">Редкий (1500💰)</button>
 <button onclick="openCase('epic')">Эпический (4000💰)</button>
-<button onclick="openCase('legendary')">Легендарный (100000💰)</button>
+<button onclick="openCase('legendary')">Легендарный (10000💰)</button>
 <p id="caseResult"></p>
 </div>
 <div class="section">
@@ -138,26 +144,24 @@ input{padding:6px;border-radius:6px;border:none;margin:4px;}
 <script>
 // ---- Регистрация ----
 function login(){
-  const nick = document.getElementById('nickInput').value.trim();
+  const nick=document.getElementById('nickInput').value.trim();
   if(!nick) return alert("Введите ник!");
-  localStorage.nick = nick;
+  localStorage.nick=nick;
   hideAll(); menu.style.display='block';
 }
 
 // ---- Переменные ----
-let gold = +localStorage.gold || 0;
-let power = +localStorage.power || 1;
-let price = +localStorage.price || 10;
-let skin = localStorage.skin || '🟥';
-let isVIP = false;
+let gold = +localStorage.gold||0;
+let power = +localStorage.power||1;
+let price = +localStorage.price||10;
+let skin = localStorage.skin||'🟥';
+let isVIP=false;
 
-// ---- Скины ----
-const skins = [
-{icon:'🐱',rarity:'common',price:500},{icon:'🐶',rarity:'common',price:500},{icon:'🐹',rarity:'common',price:500},
-{icon:'🐰',rarity:'common',price:500},{icon:'🦊',rarity:'rare',price:1500},{icon:'🐻',rarity:'rare',price:1500},
-{icon:'🐼',rarity:'rare',price:1500},{icon:'🐯',rarity:'epic',price:4000},{icon:'🦁',rarity:'epic',price:4000},
-{icon:'🐲',rarity:'epic',price:4000},{icon:'🐉',rarity:'legendary',price:10000},{icon:'🦄',rarity:'legendary',price:10000},
-{icon:'🦖',rarity:'legendary',price:10000},{icon:'🐺',rarity:'rare',price:1500},{icon:'🦥',rarity:'common',price:500}
+// ---- 25 животных ----
+const skinsData = [
+'🐱','🐶','🐹','🐰','🦊','🐻','🐼','🐯','🦁','🐲',
+'🐉','🦄','🦖','🐺','🦥','🐝','🐸','🦋','🦉','🦅',
+'🐌','🐟','🐙','🐴','🐍'
 ];
 
 // ---- Медальки ----
@@ -168,22 +172,14 @@ const medals = [
 ];
 
 // ---- Промокоды ----
-let promos = {
-"START100":{type:"gold",value:100},"POWER5":{type:"power",value:5},"GOLD500":{type:"gold",value:500},
-"VIPSKIN":{type:"skin",value:"🐉"},"BLADE2026":{type:"gold",value:1000},"CLICK50":{type:"power",value:50},
-"ANIMAL10":{type:"gold",value:200},"FURRY5":{type:"power",value:10},"LEGENDSKIN":{type:"skin",value:"🦄"},
-"TIGER50":{type:"power",value:50},"DRAGON100":{type:"gold",value:1000},"BEAR20":{type:"power",value:20},
-"UNICORN50":{type:"gold",value:500},"WOLF30":{type:"power",value:30},"FOX15":{type:"gold",value:150},
-"MONKEY25":{type:"power",value:25},"RABBIT10":{type:"gold",value:100},"PANDA50":{type:"power",value:50},
-"CAT5":{type:"gold",value:50},"DOG5":{type:"gold",value:50},"MOUSE10":{type:"power",value:10},
-"SLOTH20":{type:"gold",value:200},"UNICORNVIP":{type:"skin",value:"🦄"},"DRAGONVIP":{type:"skin",value:"🐉"},
-"FURRYVIP":{type:"skin",value:"🦊"},"BEAST100":{type:"power",value:100},"LEGEND1000":{type:"gold",value:1000},
-"ANIMALBONUS":{type:"power",value:25},"VIPGOLD":{type:"gold",value:5000},"SUPERSKIN":{type:"skin",value:"🦄"},
-"MEGAGOLD":{type:"gold",value:2000},"POWERUP50":{type:"power",value:50},"GOLD1000":{type:"gold",value:1000},
-"ANIMAL50":{type:"power",value:50},"FURRYBONUS":{type:"gold",value:500},"LEGENDSKIN2":{type:"skin",value:"🐲"}
-};
+let promos = {};
+for(let i=1;i<=150;i++){
+  if(i%3===0) promos['GOLD'+i]={type:'gold',value:i*10};
+  else if(i%3===1) promos['POWER'+i]={type:'power',value:Math.floor(i/2)};
+  else promos['SKIN'+i]={type:'skin',value:skinsData[i%skinsData.length]};
+}
 
-// ---- DOM элементы ----
+// ---- DOM ----
 const goldEl=document.getElementById('gold');
 const powerEl=document.getElementById('power');
 const priceEl=document.getElementById('price');
@@ -194,6 +190,13 @@ const pPower=document.getElementById('pPower');
 const pSkin=document.getElementById('pSkin');
 const medalDisplay=document.getElementById('medalDisplay');
 
+// ---- Кнопка Играть ----
+blade.addEventListener('click', function(){
+    let bonus = isVIP ? power*10 : power;
+    gold += bonus;
+    save(); update();
+});
+
 // ---- Функции ----
 function save(){localStorage.gold=gold; localStorage.power=power; localStorage.price=price; localStorage.skin=skin; localStorage.promos=JSON.stringify(promos);}
 function update(){
@@ -201,11 +204,10 @@ goldEl.textContent=gold; powerEl.textContent=power; priceEl.textContent=price;
 pGold.textContent=gold; pPower.textContent=power; pSkin.textContent=skin;
 blade.textContent=skin; renderSkins(); renderMedal();
 }
-blade.onclick=()=>{let gain = power; if(isVIP) gain = 100000; gold+=gain; save(); update();}
 function upgrade(){if(gold>=price){gold-=price; power++; save(); update();}}
-function renderSkins(){const box=document.getElementById('skins'); if(!box) return; box.innerHTML=''; skins.forEach(s=>{const d=document.createElement('div'); d.className='skin '+s.rarity+(skin===s.icon?' selected':''); d.textContent=s.icon; d.title=s.rarity.toUpperCase()+' — '+s.price+'💰'; d.onclick=()=>{if(gold<s.price&&!isVIP) return alert('Не хватает золота!'); if(!isVIP) gold-=s.price; skin=s.icon; save(); update();}; box.appendChild(d);});}
-function renderMedal(){medalDisplay.innerHTML=''; for(let i=medals.length-1;i>=0;i--){if(power>=medals[i].level){const m=document.createElement('div'); m.title=medals[i].name+' ('+medals[i].level+')'; medalDisplay.appendChild(m); break;}} document.getElementById('bottomMedal').textContent='🏅 '+(medalDisplay.firstChild?medalDisplay.firstChild.title:'Нет медальки');}
-function openCase(type){const prices={common:500,rare:1500,epic:4000,legendary:10000}; if(gold<prices[type]&&!isVIP) return alert('Не хватает золота!'); const pool=skins.filter(s=>s.rarity===type); const drop=pool[Math.floor(Math.random()*pool.length)]; if(!isVIP) gold-=prices[type]; skin=drop.icon; document.getElementById('caseResult').textContent='Выпало: '+drop.icon; save(); update();}
+function renderSkins(){const box=document.getElementById('skins'); if(!box) return; box.innerHTML=''; skinsData.forEach(s=>{const d=document.createElement('div'); d.className='skin'; d.textContent=s; d.onclick=()=>{skin=s; save(); update();}; box.appendChild(d);});}
+function renderMedal(){medalDisplay.innerHTML=''; for(let i=medals.length-1;i>=0;i--){if(power>=medals[i].level){const m=document.createElement('div'); m.textContent=medals[i].name; medalDisplay.appendChild(m); break;}} document.getElementById('bottomMedal').textContent='🏅 '+(medalDisplay.firstChild?medalDisplay.firstChild.textContent:'Нет медальки');}
+function openCase(type){alert('Кейсы пока открываются через магазин.');}
 function usePromo(){const code=promoInput.value.toUpperCase(); if(!promos[code]) return alert('Неверный код'); const p=promos[code]; if(p.type==='gold'){gold+=p.value;}else if(p.type==='power'){power+=p.value;}else if(p.type==='skin'){skin=p.value;} delete promos[code]; save(); update();}
 function addPromo(){const code=document.getElementById('adminPromoCode').value.toUpperCase(); const type=document.getElementById('adminPromoType').value; let value=document.getElementById('adminPromoValue').value; if(!code||!value) return alert('Введите код и значение'); promos[code]={type:type,value:value}; save(); renderPromos();}
 function renderPromos(){const promoList=document.getElementById('promoList'); promoList.innerHTML=''; Object.keys(promos).forEach(k=>{const p=document.createElement('p'); p.textContent=k+' → '+promos[k].type+' +'+promos[k].value; promoList.appendChild(p);});}
