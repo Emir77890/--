@@ -226,5 +226,129 @@ if(!localStorage.nick){document.getElementById('login').style.display='block';}
 else{hideAll(); document.getElementById('menu').style.display='block';}
 update();
 </script>
+<script>
+/* ===== АНТИЧИТ С ЖЁСТКОЙ БЛОКИРОВКОЙ ===== */
+
+const SECRET_CODE = "BLADE-247";
+
+let acClicks = [];
+let acBlocked = false;
+
+let acWarnings = +localStorage.acWarnings || 0;
+
+/* ЕСЛИ УЖЕ ЗАБЛОКИРОВАН — СРАЗУ ПОКАЗЫВАЕМ КОД */
+if (localStorage.acLocked === "true") {
+  lockScreen("Аккаунт заблокирован");
+}
+
+const AC_MAX_CPS = 15;
+const AC_MIN_INTERVAL = 40;
+const AC_CHECK = 8;
+
+const bladeEl = document.getElementById("blade");
+if (bladeEl) {
+  bladeEl.addEventListener("click", antiCheatClick, true);
+}
+
+function antiCheatClick() {
+  if (acBlocked || localStorage.acLocked === "true") return;
+
+  const now = Date.now();
+  acClicks.push(now);
+  if (acClicks.length > AC_CHECK) acClicks.shift();
+
+  // CPS
+  const cps = acClicks.filter(t => now - t < 1000).length;
+  if (cps > AC_MAX_CPS) return trigger("Слишком быстрый тап");
+
+  // Ровные интервалы
+  if (acClicks.length >= AC_CHECK) {
+    let intervals = [];
+    for (let i = 1; i < acClicks.length; i++) {
+      intervals.push(acClicks[i] - acClicks[i - 1]);
+    }
+
+    const avg = intervals.reduce((a,b)=>a+b)/intervals.length;
+    const variance = intervals.reduce((a,b)=>a+Math.abs(b-avg),0)/intervals.length;
+
+    if (avg < AC_MIN_INTERVAL || variance < 5) {
+      return trigger("Нечеловеческая скорость кликов");
+    }
+  }
+}
+
+function trigger(reason) {
+  acBlocked = true;
+  acWarnings++;
+  localStorage.acWarnings = acWarnings;
+
+  if (acWarnings === 1) {
+    alert(
+      "⚠️ ПРЕДУПРЕЖДЕНИЕ!\n\n" +
+      "Обнаружен нечестный клик:\n" +
+      reason
+    );
+
+    setTimeout(() => {
+      acBlocked = false;
+      acClicks = [];
+    }, 1500);
+
+  } else {
+    localStorage.acLocked = "true";
+    lockScreen(reason);
+  }
+}
+
+/* ===== НЕЗАКРЫВАЕМОЕ ОКНО ===== */
+function lockScreen(reason) {
+  document.body.innerHTML = "";
+
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.background = "#000";
+  overlay.style.color = "#fff";
+  overlay.style.display = "flex";
+  overlay.style.flexDirection = "column";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+  overlay.style.fontFamily = "Arial";
+  overlay.style.zIndex = 999999;
+
+  overlay.innerHTML = `
+    <h2>🚫 ДОСТУП ЗАБЛОКИРОВАН</h2>
+    <p style="text-align:center;max-width:320px">
+      ${reason}<br><br>
+      Введите код администратора
+    </p>
+    <input id="codeInput"
+      placeholder="Введите код"
+      style="padding:10px;font-size:16px;border-radius:8px;border:none;text-align:center;">
+    <button id="codeBtn"
+      style="margin-top:12px;padding:10px 22px;font-size:16px;
+      border:none;border-radius:10px;background:#ff4444;color:#fff;">
+      Подтвердить
+    </button>
+    <p id="err" style="color:#ff5555;margin-top:10px;"></p>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById("codeBtn").onclick = () => {
+    const val = document.getElementById("codeInput").value.trim();
+    if (val === SECRET_CODE) {
+      localStorage.clear();
+      location.href = location.pathname;
+    } else {
+      document.getElementById("err").textContent = "❌ Неверный код";
+    }
+  };
+}
+</script>
+
 </body>
 </html>
