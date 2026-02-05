@@ -26,6 +26,86 @@ input{padding:6px;border-radius:6px;border:none;margin:4px;width:80%;}
 .yui {
   background-color: red;
 }
+/* ===== ОБЩЕЕ ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  height: 100vh;
+  background: #0b0b0b;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== ВЕРХНЯЯ ПАНЕЛЬ ===== */
+.header {
+  width: 100%;
+  padding: 12px;
+  background: #111;
+  border-bottom: 1px solid #222;
+  display: flex;
+  justify-content: space-around;
+  font-size: 14px;
+}
+
+/* ===== ИГРОВАЯ ЗОНА ===== */
+.game {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== КНОПКА КЛИКА ===== */
+.blade {
+  width: 180px;
+  height: 180px;
+  border-radius: 28px;
+  background: radial-gradient(circle at top, #ff4a4a, #7a0000);
+  box-shadow: 0 0 30px rgba(255, 60, 60, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.08s ease;
+}
+
+.blade:active {
+  transform: scale(0.92);
+}
+
+/* ===== НИЖНЯЯ ПАНЕЛЬ ===== */
+.footer {
+  width: 100%;
+  padding: 10px;
+  background: #111;
+  border-top: 1px solid #222;
+  display: flex;
+  justify-content: space-around;
+}
+
+.footer button {
+  background: #1c1c1c;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.footer button:hover {
+  background: #2a2a2a;
+}
+
 </style>
 </head>
 <body>
@@ -60,6 +140,37 @@ input{padding:6px;border-radius:6px;border:none;margin:4px;width:80%;}
 <button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame9','_blank')">🏹 Игра9</button>
 </div>
 <div style="width:40px;height:40px;background:#222;border-radius:50%;margin-top:8px;"></div>
+
+<!-- HTML: место для отображения FPS -->
+<div id="fpsCounter" style="
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  color: #0f0;
+  font-family: monospace;
+  font-size: 14px;
+  z-index: 1000;
+">FPS: 0</div>
+
+<script>
+// ==== FPS Счётчик ====
+let lastTime = performance.now();
+let frames = 0;
+
+function updateFPS(now) {
+    frames++;
+    if (now - lastTime >= 1000) { // 1 секунда
+        document.getElementById('fpsCounter').textContent = "FPS: " + frames;
+        frames = 0;
+        lastTime = now;
+    }
+    requestAnimationFrame(updateFPS); // следующий кадр
+}
+
+// Запуск
+requestAnimationFrame(updateFPS);
+</script>
+
 </div>
 </div>
 </div>
