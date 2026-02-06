@@ -129,15 +129,75 @@ body {
 <div class="mini-phone">
 <div style="width:60px;height:6px;background:#555;border-radius:3px;margin-bottom:10px;"></div>
 <div class="mini-screen">
-<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame1','_blank')">🎮 Игра1</button>
-<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame2','_blank')">🕹️ Игра2</button>
-<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame3','_blank')">🧩 Игра3</button>
-<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame4','_blank')">⚡ Игра4</button>
-<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame5','_blank')">🏎️ Игра5</button>
-<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame6','_blank')">🛡️ Игра6</button>
-<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame7','_blank')">🧙 Игра7</button>
-<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame8','_blank')">🎯 Игра8</button>
-<button onclick="window.open('https://play.google.com/store/apps/details?id=com.minigame9','_blank')">🏹 Игра9</button>
+<!-- Мини-игры -->
+<div id="miniGamesPanel">
+<h2>🎮 Мини-игры</h2>
+
+<!-- Игра 1: Угадай число -->
+<button class="mini-game-btn" onclick="game1()">Игра 1: Угадай число</button>
+
+
+<!-- Игра 3: Монета -->
+<button class="mini-game-btn" onclick="game3()">Игра 3: Подбрось монету</button>
+
+<button onclick="backFromMiniGames()">Назад в меню</button>
+<div id="miniGameResult" style="margin-top:15px;color:#0f0;"></div>
+</div>
+
+<script>
+// ==== Мини-игры ====
+
+function game1(){
+  const target = Math.floor(Math.random()*5)+1;
+  const guess = prompt("Угадай число от 1 до 5");
+  if(!guess) return;
+  if(+guess === target){
+    const reward = 500;
+    gold += reward;
+    save(); update();
+    document.getElementById('miniGameResult').textContent = `🎉 Верно! +${reward} золота`;
+  } else {
+    document.getElementById('miniGameResult').textContent = `❌ Неверно! Было ${target}`;
+  }
+}
+
+function game2(){
+  document.getElementById('miniGameResult').textContent = '';
+  let clicks = 0;
+  alert("Нажимай кнопку как можно быстрее в течении 5 секунд!");
+  const btn = document.createElement('button');
+  btn.textContent = "Клик!";
+  btn.style.marginTop="10px";
+  document.getElementById('miniGamesPanel').appendChild(btn);
+
+  const start = Date.now();
+  btn.onclick = () => {
+    clicks++;
+    const elapsed = (Date.now()-start)/1000;
+    if(elapsed >=5){
+      btn.remove();
+      const reward = clicks*10;
+      gold += reward;
+      save(); update();
+      document.getElementById('miniGameResult').textContent = `🔥 Ты кликнул ${clicks} раз! +${reward} золота`;
+    }
+  };
+}
+
+function game3(){
+  const flip = Math.random()<0.5?"Орёл":"Решка";
+  const guess = prompt("Орёл или Решка?");
+  if(!guess) return;
+  if(guess.toLowerCase()===flip.toLowerCase()){
+    const reward = 200;
+    gold += reward;
+    save(); update();
+    document.getElementById('miniGameResult').textContent = `🎉 Угадал! +${reward} золота`;
+  } else {
+    document.getElementById('miniGameResult').textContent = `❌ Неверно! Выпало ${flip}`;
+  }
+}
+</script>
 </div>
 <div style="width:40px;height:40px;background:#222;border-radius:50%;margin-top:8px;"></div>
 
@@ -458,6 +518,164 @@ function lockScreen(reason) {
       document.getElementById("err").textContent = "❌ Неверный код";
     }
   };
+}
+</script>
+<!-- ================== ДОБАВЛЕННАЯ ЗАЩИТА HTML ================== -->
+<script>
+/* Блок ПКМ и горячих клавиш (базовая защита) */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (
+    e.key === 'F12' ||
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) ||
+    (e.ctrlKey && e.key === 'U')
+  ) {
+    e.preventDefault();
+    return false;
+  }
+});
+</script>
+
+<!-- ================== ДОБАВКА В МАГАЗИН (HTML) ================== -->
+<script>
+/* Добавляем новые секции в магазин БЕЗ изменения HTML */
+document.addEventListener("DOMContentLoaded", () => {
+  const shop = document.getElementById("shop");
+  if (!shop) return;
+
+  const extra = document.createElement("div");
+  extra.innerHTML = `
+    <div class="section">
+      <h3>🐾 Питомцы</h3>
+      <button onclick="buyPet('wolf',20000)">🐺 Волк (+50% к клику)</button>
+      <button onclick="buyPet('dragon',75000)">🐲 Дракон (+200% к клику)</button>
+      <button onclick="buyPet('phoenix',150000)">🔥 Феникс (+500% к клику)</button>
+    </div>
+
+    <div class="section">
+      <h3>🚀 Усиления</h3>
+      <button onclick="buyBoosterX(2,5000)">x2 золото (30 сек)</button>
+      <button onclick="buyBoosterX(5,15000)">x5 золото (30 сек)</button>
+    </div>
+
+    <div class="section">
+      <h3>🤖 Улучшения</h3>
+      <button onclick="buyAutoClick()">🖱️ Автоклик (1/сек)</button>
+      <button onclick="dailyReward()">🎁 Ежедневная награда</button>
+    </div>
+  `;
+  shop.appendChild(extra);
+});
+</script>
+
+<!-- ================== ЛОГИКА (JS) ================== -->
+<script>
+/* ---- Ранги ---- */
+window.rank = localStorage.rank || "player"; // player | admin | develop 
+/* ===== VIP ВХОД ПО ПАРОЛЮ (БЕЗ ИЗМЕНЕНИЯ ТВОЕГО КОДА) ===== */
+
+const VIP_PASSWORD = "VIP-7777"; // ← поменяй на свой
+
+// переопределяем вход в VIP, не трогая остальной код
+window.openVIP = function () {
+  const pass = prompt("🔐 Введите пароль VIP-панели");
+
+  if (pass !== VIP_PASSWORD) {
+    alert("🚫 Неверный пароль");
+    return;
+  }
+
+  isVIP = true;
+  hideAll();
+  document.getElementById("vipPanel").style.display = "block";
+};
+
+/* ---- Питомцы ---- */
+let pet = localStorage.pet || "none";
+
+function buyPet(type, cost){
+  if (gold < cost) return alert("Не хватает золота");
+  gold -= cost;
+  pet = type;
+  localStorage.pet = pet;
+  save(); update();
+}
+
+/* ---- Бустеры ---- */
+let boosterX = 1;
+function buyBoosterX(x, cost){
+  if (gold < cost) return alert("Не хватает золота");
+  gold -= cost;
+  boosterX = x;
+  setTimeout(()=> boosterX = 1, 30000);
+  save(); update();
+}
+
+/* ---- Автоклик (легальный) ---- */
+let autoClick = localStorage.autoClick === "true";
+
+function buyAutoClick(){
+  if (autoClick) return alert("Уже куплено");
+  if (gold < 100000) return alert("Не хватает золота");
+  gold -= 100000;
+  autoClick = true;
+  localStorage.autoClick = "true";
+  save(); update();
+}
+
+setInterval(()=>{
+  if (autoClick && document.getElementById("game").style.display === "block") {
+    gold += power;
+    update();
+  }
+},1000);
+
+/* ---- Дейли ---- */
+function dailyReward(){
+  const last = +localStorage.daily || 0;
+  if (Date.now() - last < 86400000) return alert("⏳ Уже получено");
+  gold += 5000;
+  localStorage.daily = Date.now();
+  save(); update();
+  alert("🎁 +5000 золота");
+}
+
+/* ---- Усиление клика (через перехват) ---- */
+const oldClick = blade.onclick;
+blade.onclick = () => {
+  let bonus = power;
+
+  if (pet === "wolf") bonus *= 1.5;
+  if (pet === "dragon") bonus *= 3;
+  if (pet === "phoenix") bonus *= 6;
+
+  bonus *= boosterX;
+  if (isVIP) bonus *= 10;
+
+  gold += Math.floor(bonus);
+  save(); update();
+};
+
+/* ---- Анти-подмена золота ---- */
+let lastGold = gold;
+setInterval(()=>{
+  if (gold > lastGold + power * 20) {
+    localStorage.acLocked = "true";
+    location.reload();
+  }
+  lastGold = gold;
+},1000);
+
+/* ---- Защита функций ---- */
+Object.freeze(openVIP);
+Object.freeze(buyPet);
+Object.freeze(buyAutoClick);
+</script>
+<script>
+function resetGold(){
+  gold = 0;
+  localStorage.gold = 0;
+  update();
 }
 </script>
 
