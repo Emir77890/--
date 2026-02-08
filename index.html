@@ -125,6 +125,7 @@ body {
 <button onclick="openProfile()">Профиль</button>
 <button onclick="openVIP()">VIP Панель</button>
 <button onclick="openAdmin()">Админ</button>
+ <a href="ii.html">Драка с боссом</a>
 <div id="miniIphone">
 <div class="mini-phone">
 <div style="width:60px;height:6px;background:#555;border-radius:3px;margin-bottom:10px;"></div>
@@ -210,7 +211,7 @@ function game3(){
   font-family: monospace;
   font-size: 14px;
   z-index: 1000;
-">FPS: 0</div>
+">FPS: 5000000000000000</div>
 
 <script>
 // ==== FPS Счётчик ====
@@ -243,6 +244,95 @@ requestAnimationFrame(updateFPS);
 <div id="blade">🟥</div>
 <button onclick="upgrade()">Улучшить (+1 сила, <span id="price">10</span> золота)</button><br>
 <button onclick="back()">Назад</button>
+<script>
+  // Ровные интервалы
+  if (acClicks.length >= AC_CHECK) {
+    let intervals = [];
+    for (let i = 1; i < acClicks.length; i++) {
+      intervals.push(acClicks[i] - acClicks[i - 1]);
+    }
+
+    const avg = intervals.reduce((a,b)=>a+b)/intervals.length;
+    const variance = intervals.reduce((a,b)=>a+Math.abs(b-avg),0)/intervals.length;
+
+    if (avg < AC_MIN_INTERVAL || variance < 1) {
+      return trigger("Нечеловеческая скорость кликов");
+    }
+  }
+}
+
+function trigger(reason) {
+  acBlocked = true;
+  acWarnings++;
+  localStorage.acWarnings = acWarnings;
+
+  if (acWarnings === 1) {
+    alert(
+      "⚠️ ПРЕДУПРЕЖДЕНИЕ!\n\n" +
+      "Обнаружен нечестный клик:\n" +
+      reason
+    );
+
+    setTimeout(() => {
+      acBlocked = false;
+      acClicks = [];
+    }, 1500);
+
+  } else {
+    localStorage.acLocked = "true";
+    lockScreen(reason);
+  }
+}
+
+/* ===== НЕЗАКРЫВАЕМОЕ ОКНО ===== */
+function lockScreen(reason) {
+  document.body.innerHTML = "";
+
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.background = "#000";
+  overlay.style.color = "#fff";
+  overlay.style.display = "flex";
+  overlay.style.flexDirection = "column";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+  overlay.style.fontFamily = "Arial";
+  overlay.style.zIndex = 999999;
+
+  overlay.innerHTML = `
+    <h2>🚫 ДОСТУП ЗАБЛОКИРОВАН</h2>
+    <p style="text-align:center;max-width:320px">
+      ${reason}<br><br>
+      Введите код администратора
+    </p>
+    <input id="codeInput"
+      placeholder="Введите код"
+      style="padding:10px;font-size:16px;border-radius:8px;border:none;text-align:center;">
+    <button id="codeBtn"
+      style="margin-top:12px;padding:10px 22px;font-size:16px;
+      border:none;border-radius:10px;background:#ff4444;color:#fff;">
+      Подтвердить
+    </button>
+    <p id="err" style="color:#ff5555;margin-top:10px;"></p>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById("codeBtn").onclick = () => {
+    const val = document.getElementById("codeInput").value.trim();
+    if (val === SECRET_CODE) {
+      localStorage.clear();
+      location.href = location.pathname;
+    } else {
+      document.getElementById("err").textContent = "❌ Неверный код";
+    }
+  };
+}
+</script>
 </div>
 
 <!-- Магазин -->
@@ -421,9 +511,10 @@ if (bladeEl) {
   bladeEl.addEventListener("click", antiCheatClick, true);
 }
 
-function antiCheatClick() {
+function antiCheatClick() { 
+  const AC_MAX_CPS = 15;
   if (acBlocked || localStorage.acLocked === "true") return;
-
+  const id="game"
   const now = Date.now();
   acClicks.push(now);
   if (acClicks.length > AC_CHECK) acClicks.shift();
@@ -432,96 +523,8 @@ function antiCheatClick() {
   const cps = acClicks.filter(t => now - t < 1000).length;
   if (cps > AC_MAX_CPS) return trigger("Слишком быстрый тап");
 
-  // Ровные интервалы
-  if (acClicks.length >= AC_CHECK) {
-    let intervals = [];
-    for (let i = 1; i < acClicks.length; i++) {
-      intervals.push(acClicks[i] - acClicks[i - 1]);
-    }
-
-    const avg = intervals.reduce((a,b)=>a+b)/intervals.length;
-    const variance = intervals.reduce((a,b)=>a+Math.abs(b-avg),0)/intervals.length;
-
-    if (avg < AC_MIN_INTERVAL || variance < 5) {
-      return trigger("Нечеловеческая скорость кликов");
-    }
-  }
-}
-
-function trigger(reason) {
-  acBlocked = true;
-  acWarnings++;
-  localStorage.acWarnings = acWarnings;
-
-  if (acWarnings === 1) {
-    alert(
-      "⚠️ ПРЕДУПРЕЖДЕНИЕ!\n\n" +
-      "Обнаружен нечестный клик:\n" +
-      reason
-    );
-
-    setTimeout(() => {
-      acBlocked = false;
-      acClicks = [];
-    }, 1500);
-
-  } else {
-    localStorage.acLocked = "true";
-    lockScreen(reason);
-  }
-}
-
-/* ===== НЕЗАКРЫВАЕМОЕ ОКНО ===== */
-function lockScreen(reason) {
-  document.body.innerHTML = "";
-
-  const overlay = document.createElement("div");
-  overlay.style.position = "fixed";
-  overlay.style.top = 0;
-  overlay.style.left = 0;
-  overlay.style.width = "100%";
-  overlay.style.height = "100%";
-  overlay.style.background = "#000";
-  overlay.style.color = "#fff";
-  overlay.style.display = "flex";
-  overlay.style.flexDirection = "column";
-  overlay.style.alignItems = "center";
-  overlay.style.justifyContent = "center";
-  overlay.style.fontFamily = "Arial";
-  overlay.style.zIndex = 999999;
-
-  overlay.innerHTML = `
-    <h2>🚫 ДОСТУП ЗАБЛОКИРОВАН</h2>
-    <p style="text-align:center;max-width:320px">
-      ${reason}<br><br>
-      Введите код администратора
-    </p>
-    <input id="codeInput"
-      placeholder="Введите код"
-      style="padding:10px;font-size:16px;border-radius:8px;border:none;text-align:center;">
-    <button id="codeBtn"
-      style="margin-top:12px;padding:10px 22px;font-size:16px;
-      border:none;border-radius:10px;background:#ff4444;color:#fff;">
-      Подтвердить
-    </button>
-    <p id="err" style="color:#ff5555;margin-top:10px;"></p>
-  `;
-
-  document.body.appendChild(overlay);
-
-  document.getElementById("codeBtn").onclick = () => {
-    const val = document.getElementById("codeInput").value.trim();
-    if (val === SECRET_CODE) {
-      localStorage.clear();
-      location.href = location.pathname;
-    } else {
-      document.getElementById("err").textContent = "❌ Неверный код";
-    }
-  };
-}
-</script>
 <!-- ================== ДОБАВЛЕННАЯ ЗАЩИТА HTML ================== -->
-<script>
+
 /* Блок ПКМ и горячих клавиш (базовая защита) */
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('keydown', e => {
@@ -561,7 +564,7 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="section">
       <h3>🤖 Улучшения</h3>
       <button onclick="buyAutoClick()">🖱️ Автоклик (1/сек)</button>
-      <button onclick="dailyReward()">🎁 Ежедневная награда</button>
+      <button onclick="dailyReward()">🎁 Блокировка аккаунта</button>
     </div>
   `;
   shop.appendChild(extra);
@@ -637,7 +640,7 @@ function dailyReward(){
   gold += 5000;
   localStorage.daily = Date.now();
   save(); update();
-  alert("🎁 +5000 золота");
+  alert("Блокировка аккаунта код BLADE-267 но идет щас в разроботке 5000 золота ");
 }
 
 /* ---- Усиление клика (через перехват) ---- */

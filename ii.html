@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Blade Clicker: Бой с Боссом</title>
+<style>
+body {
+  font-family: Arial; 
+  background:#111; 
+  color:white; 
+  text-align:center;
+  margin:0;
+  padding:20px;
+}
+button {
+  padding:10px 15px; 
+  margin:5px; 
+  cursor:pointer;
+  background:#333; 
+  color:white; 
+  border:none;
+  border-radius:6px;
+}
+#goldDisplay {
+  font-size:20px; 
+  margin-bottom:15px;
+}
+#bossArea {
+  display:none; 
+  margin-top:20px; 
+  border:2px solid #555; 
+  padding:15px; 
+  border-radius:12px; 
+  background:#222; 
+  color:white; 
+  width:400px; 
+  margin:auto;
+  position:relative;
+}
+#bossHPbar {
+  height:20px; 
+  background:red; 
+  border-radius:10px; 
+  margin-bottom:10px;
+}
+.damage {
+  font-weight:bold; 
+  display:inline-block; 
+  position:absolute;
+  animation: fade 1s forwards; 
+  font-size:18px;
+}
+@keyframes fade { 0% {opacity:1; transform:translateY(0);} 100% {opacity:0; transform:translateY(-30px);} }
+</style>
+</head>
+<body>
+
+<h1>Blade Clicker: Динамичный Бой с Боссом</h1>
+
+<!-- Основное золото -->
+<div id="goldDisplay">
+  Золото: <span id="goldAmount">0</span>
+</div>
+
+<!-- Выбор оружия -->
+<h2>Выберите оружие</h2>
+<div id="weapons" style="margin-bottom:15px;">
+  <button onclick="chooseWeapon('Меч',50)">Меч (50 урона)</button>
+  <button onclick="chooseWeapon('Лук',30)">Лук (30 урона)</button>
+  <button onclick="chooseWeapon('Магия',70)">Магия (70 урона)</button>
+  <button onclick="chooseWeapon('АК-101',90)">АК-101 (90 урона)</button>
+  <button onclick="chooseWeapon('Ракетница',150)">Ракетница (150 урона)</button>
+  <batton onclick="chooseWeapon('Ак-74', 91)">AKP-74 (91 урона)</batton>
+</div>
+
+<!-- Окно босса -->
+<div id="bossArea">
+  <h2 id="bossName">Босс появился!</h2>
+  <div id="bossHPbar"></div>
+  <p>HP босса: <span id="bossHP">0</span> / <span id="bossMaxHP">0</span></p>
+  <p>Твоё оружие: <span id="playerWeapon">-</span></p>
+  <button onclick="hitBoss()">Атаковать босса</button>
+</div>
+
+<script>
+// ====== Переменные ======
+let gold = 0;
+let playerWeapon = "";
+let playerDamage = 0;
+let bossHP = 0;
+let bossMaxHP = 0;
+let bossName = "";
+let bossDamage = 0;
+let bossReward = 0;
+let bossAttackInterval;
+
+// ====== Функция обновления золота ======
+function updateGoldDisplay(){
+  document.getElementById("goldAmount").innerText = gold;
+}
+
+// ====== Выбор оружия ======
+function chooseWeapon(name, damage){
+  playerWeapon = name;
+  playerDamage = damage;
+  document.getElementById("playerWeapon").innerText = playerWeapon;
+  spawnBoss();
+}
+
+// ====== Создание босса ======
+function spawnBoss(){
+  const bosses = [
+    {name:"Огненный Дракон", hp:1200, damage:30, reward:500},
+    {name:"Ледяной Гигант", hp:1500, damage:50, reward:700},
+    {name:"Тёмный Маг", hp:1000, damage:40, reward:600},
+    {name:"Болотный Монстр", hp:1100, damage:35, reward:550},
+    {name:"Кибер-Демон", hp:1300, damage:45, reward:650}
+  ];
+
+  const b = bosses[Math.floor(Math.random()*bosses.length)];
+  bossName = b.name;
+  bossHP = b.hp;
+  bossMaxHP = b.hp;
+  bossDamage = b.damage;
+  bossReward = b.reward;
+
+  document.getElementById("bossName").innerText = bossName;
+  document.getElementById("bossHP").innerText = bossHP;
+  document.getElementById("bossMaxHP").innerText = bossMaxHP;
+  document.getElementById("bossHPbar").style.width = "100%";
+  document.getElementById("bossArea").style.display = "block";
+
+  // Атака босса каждые 3 сек
+  bossAttackInterval = setInterval(()=>{ bossAttack(); },3000);
+
+  // Босс убегает через 30 сек
+  setTimeout(()=>{
+    if(bossHP>0){
+      alert("Босс убежал!");
+      document.getElementById("bossArea").style.display = "none";
+      clearInterval(bossAttackInterval);
+    }
+  },30000);
+}
+
+// ====== Атака игрока ======
+function hitBoss(){
+  if(playerDamage===0){
+    alert("Сначала выбери оружие!");
+    return;
+  }
+
+  // Критический удар 20% шанс
+  let crit = Math.random()<0.2;
+  let damage = crit ? playerDamage*2 : playerDamage;
+
+  bossHP -= damage;
+  if(bossHP<0) bossHP = 0;
+
+  showDamage(damage, crit);
+
+  // Обновление HP босса
+  document.getElementById("bossHP").innerText = bossHP;
+  const hpPercent = (bossHP/bossMaxHP)*100;
+  document.getElementById("bossHPbar").style.width = hpPercent+"%";
+
+  // Проверка смерти босса
+  if(bossHP===0){
+    alert(`Босс побеждён! +${bossReward} золота`);
+    gold += bossReward;
+    updateGoldDisplay();
+    document.getElementById("bossArea").style.display = "none";
+    clearInterval(bossAttackInterval);
+  }
+}
+
+// ====== Атака босса ======
+function bossAttack(){
+  if(gold<=0) return;
+  let lostGold = Math.min(Math.floor(Math.random()*bossDamage), gold);
+  gold -= lostGold;
+  updateGoldDisplay();
+
+  const div = document.createElement("div");
+  div.className="damage";
+  div.style.color="red";
+  div.innerText=`Босс отнял ${lostGold} золота!`;
+  div.style.left = (Math.random()*window.innerWidth-50)+"px";
+  div.style.top = (Math.random()*window.innerHeight-50)+"px";
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),1000);
+}
+
+// ====== Анимация урона ======
+function showDamage(amount, crit){
+  const div = document.createElement("div");
+  div.className="damage";
+  div.style.color = crit ? "gold" : "red";
+  div.innerText=`-${amount}`;
+  div.style.left = (window.innerWidth/2 + (Math.random()*40-20))+"px";
+  div.style.top = (window.innerHeight/2 + (Math.random()*40-20))+"px";
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),1000);
+}
+</script>
+<a href="index.html">Назад</a>
+</body>
+</html>
