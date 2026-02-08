@@ -51,6 +51,48 @@ button {
   font-size:18px;
 }
 @keyframes fade { 0% {opacity:1; transform:translateY(0);} 100% {opacity:0; transform:translateY(-30px);} }
+/* Сброс отступов и границ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Занимает весь экран */
+.screen {
+  width: 100vw;               /* ширина экрана */
+  height: 100vh;              /* высота экрана */
+  display: flex;              /* для центрирования элементов */
+  flex-direction: column;     /* направление: сверху вниз */
+  justify-content: center;    /* центр по вертикали */
+  align-items: center;        /* центр по горизонтали */
+  background: linear-gradient(to bottom, #4facfe, #00f2fe); /* градиент фона */
+  font-family: Arial, sans-serif;
+}
+
+/* Заголовок на экране */
+.screen .title {
+  font-size: 3rem;
+  color: white;
+  margin-bottom: 20px;
+}
+
+/* Кнопка на экране */
+.screen .button {
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 10px;
+  background-color: white;
+  color: #4facfe;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.screen .button:hover {
+  background-color: #e0e0e0;
+}
+
 </style>
 </head>
 <body>
