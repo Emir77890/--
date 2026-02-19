@@ -105,10 +105,331 @@ body {
 .footer button:hover {
   background: #2a2a2a;
 }
+/* ================= НОЧНЫЕ ЭФФЕКТЫ ================= */
+
+.stars{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+overflow:hidden;
+z-index:0;
+animation:skyMove 120s linear infinite;
+display:none;
+}
+
+@keyframes skyMove{
+from{transform:translateY(0)}
+to{transform:translateY(-200px)}
+}
+
+.star{
+position:absolute;
+width:2px;
+height:2px;
+background:white;
+border-radius:50%;
+animation:twinkle 2s infinite alternate;
+}
+
+.vip-star{
+background:gold;
+box-shadow:0 0 8px gold;
+}
+
+@keyframes twinkle{
+from{opacity:0.3}
+to{opacity:1}
+}
+
+.shooting-star{
+position:absolute;
+width:120px;
+height:2px;
+background:linear-gradient(90deg,white,transparent);
+animation:shoot 2s linear forwards;
+}
+
+@keyframes shoot{
+from{
+transform:translateX(0) translateY(0);
+opacity:1;
+}
+to{
+transform:translateX(400px) translateY(200px);
+opacity:0;
+}
+}
+
+/* Полумесяц */
+.moon{
+position:fixed;
+top:20px;
+right:20px;
+width:90px;
+height:90px;
+background:#fff;
+border-radius:50%;
+box-shadow:0 0 40px #fff;
+z-index:1;
+display:none;
+}
+
+.moon::after{
+content:"";
+position:absolute;
+top:0;
+left:25px;
+width:90px;
+height:90px;
+background:#0b0b0b;
+border-radius:50%;
+}
+
+/* Лёгкое свечение кнопок */
+button{
+transition:0.3s;
+}
+
+button:hover{
+box-shadow:0 0 20px gold;
+transform:scale(1.05);
+}
+
+/* Чтобы меню и магазин были поверх */
+#menu,#shop{
+position:relative;
+z-index:2;
+}
+/* ================= ТАСБИХ АНИМАЦИЯ ================= */
+
+.tasbih{
+position:fixed;
+bottom:15px;
+right:15px;
+width:60px;
+height:60px;
+border-radius:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:9998;
+animation:rotateTasbih 8s linear infinite;
+}
+
+.tasbih span{
+position:absolute;
+width:8px;
+height:8px;
+background:gold;
+border-radius:50%;
+}
+
+@keyframes rotateTasbih{
+from{transform:rotate(0deg);}
+to{transform:rotate(360deg);}
+}
+/* ================= НОЧНОЙ РАМАДАН ЭФФЕКТ ================= */
+
+/* Звёзды */
+.stars{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+overflow:hidden;
+z-index:0;
+}
+
+.star{
+position:absolute;
+width:2px;
+height:2px;
+background:white;
+border-radius:50%;
+animation:twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle{
+from{opacity:0.3} to{opacity:1;}
+}
+
+/* Полумесяц */
+.moon{
+position:fixed;
+top:20px;
+right:20px;
+width:90px;
+height:90px;
+background:#fff;
+border-radius:50%;
+box-shadow:0 0 40px #fff;
+z-index:1;
+}
+
+.moon::after{
+content:"";
+position:absolute;
+top:0;
+left:25px;
+width:90px;
+height:90px;
+background:#0b0b0b;
+border-radius:50%;
+}
+
+/* Тасбих */
+.tasbih{
+position:fixed;
+bottom:15px;
+right:15px;
+width:60px;
+height:60px;
+border-radius:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:1;
+animation:rotateTasbih 8s linear infinite;
+}
+
+.tasbih span{
+position:absolute;
+width:8px;
+height:8px;
+background:gold;
+border-radius:50%;
+}
+
+@keyframes rotateTasbih{
+from{transform:rotate(0deg);} to{transform:rotate(360deg);}
+}
+
+/* Мини приветствие */
+.mini-greeting{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+background:rgba(0,0,0,0.75);
+color:#ffd700;
+padding:12px 20px;
+border-radius:25px;
+font-size:16px;
+font-weight:bold;
+z-index:9999;
+box-shadow:0 0 20px gold;
+text-align:center;
+animation:slideDown 0.6s ease;
+}
+
+@keyframes slideDown{
+from{transform:translate(-50%,-20px);opacity:0;}
+to{transform:translate(-50%,0);opacity:1;}
+}
 
 </style>
 </head>
 <body>
+  <!-- ================= НОЧНОЙ РАМАДАН ЭКРАН ================= -->
+<div class="stars" id="stars"></div>
+<div class="moon" id="moon"></div>
+<div class="tasbih" id="tasbih"></div>
+<div class="mini-greeting" id="ramadanGreeting">
+🤲 Ассаляму алейкум! Добро пожаловать! 🌙✨
+</div>
+
+<script>
+// ==== ЗВЁЗДЫ ====
+function createStars(){
+  const container=document.getElementById("stars");
+  container.innerHTML="";
+  for(let i=0;i<150;i++){
+    const star=document.createElement("div");
+    star.className="star";
+    star.style.top=Math.random()*100+"%";
+    star.style.left=Math.random()*100+"%";
+    star.style.animationDuration=(Math.random()*3+1)+"s";
+    container.appendChild(star);
+  }
+}
+
+// ==== ПАДАЮЩИЕ ЗВЁЗДЫ ====
+function shootingStar(){
+  const container=document.getElementById("stars");
+  if(container.style.display==="none") return;
+  const star=document.createElement("div");
+  star.className="shooting-star";
+  star.style.top=Math.random()*50+"%";
+  star.style.left=Math.random()*50+"%";
+  container.appendChild(star);
+  setTimeout(()=>star.remove(),2000);
+}
+setInterval(shootingStar,8000);
+
+// ==== ТАСБИХ ====
+const tasbih=document.getElementById("tasbih");
+for(let i=0;i<33;i++){
+  const bead=document.createElement("span");
+  const angle=(i/33)*Math.PI*2;
+  const radius=25;
+  bead.style.left=30 + Math.cos(angle)*radius + "px";
+  bead.style.top=30 + Math.sin(angle)*radius + "px";
+  tasbih.appendChild(bead);
+}
+
+// ==== МИНИ ПРИВЕТ ====
+setTimeout(()=>{
+  const g=document.getElementById("ramadanGreeting");
+  if(g) g.remove();
+},5000);
+
+// ==== БОНУС ПРИ ПЕРВОМ ВХОДЕ ====
+if(!localStorage.ramadanGift){
+  if(typeof gold!=="undefined"){
+    gold += 1000; 
+    if(typeof save==="function") save();
+    if(typeof update==="function") update();
+  }
+  localStorage.ramadanGift="true";
+}
+
+// ==== ПОКАЗ НОЧНОГО ФОНА ====
+function updateNightBackground(){
+  const menuVisible=document.getElementById("menu").style.display==="block";
+  const shopVisible=document.getElementById("shop").style.display==="block";
+  const stars=document.getElementById("stars");
+  const moon=document.getElementById("moon");
+  const tasbihEl=document.getElementById("tasbih");
+  if(menuVisible || shopVisible){
+    stars.style.display="block";
+    moon.style.display="block";
+    tasbihEl.style.display="block";
+    createStars();
+  }else{
+    stars.style.display="none";
+    moon.style.display="none";
+    tasbihEl.style.display="none";
+  }
+}
+
+// ==== ПЕРЕХВАТ hideAll ====
+if(typeof hideAll==="function"){
+  const oldHideAll=hideAll;
+  hideAll=function(){
+    oldHideAll();
+    setTimeout(updateNightBackground,50);
+  };
+}
+
+setTimeout(updateNightBackground,100);
+</script>
+
+
 
 <!-- Регистрация -->
 <div id="login">
@@ -123,7 +444,7 @@ body {
 <button onclick="openGame()">Играть</button>
 <button onclick="openShop()">Магазин</button>
 <button onclick="openProfile()">Профиль</button>
-<button onclick="openVIP()">VIP Панель</button>
+<button> <a href="oi.html">VIP Панель</a>VIP Панель</button>
 <button onclick="openAdmin()">Админ</button>
  <a href="ii.html">Драка с боссом</a>
 <div id="miniIphone">
@@ -680,6 +1001,73 @@ function resetGold(){
   localStorage.gold = 0;
   update();
 }
+</script>
+<!-- ================= НОЧНОЙ ФОН ================= -->
+<div class="stars" id="stars"></div>
+<div class="moon" id="moon"></div>
+
+<script>
+function createStars(){
+const container=document.getElementById("stars");
+container.innerHTML="";
+for(let i=0;i<180;i++){
+const star=document.createElement("div");
+star.className="star";
+
+if(typeof isVIP!=="undefined" && isVIP && Math.random()<0.2){
+star.classList.add("vip-star");
+}
+
+star.style.top=Math.random()*100+"%";
+star.style.left=Math.random()*100+"%";
+star.style.animationDuration=(Math.random()*3+1)+"s";
+
+container.appendChild(star);
+}
+}
+
+function shootingStar(){
+const container=document.getElementById("stars");
+if(container.style.display==="none") return;
+
+const star=document.createElement("div");
+star.className="shooting-star";
+star.style.top=Math.random()*50+"%";
+star.style.left=Math.random()*50+"%";
+
+container.appendChild(star);
+setTimeout(()=>star.remove(),2000);
+}
+
+setInterval(shootingStar,8000);
+
+function updateNightBackground(){
+const menuVisible=document.getElementById("menu").style.display==="block";
+const shopVisible=document.getElementById("shop").style.display==="block";
+
+const stars=document.getElementById("stars");
+const moon=document.getElementById("moon");
+
+if(menuVisible || shopVisible){
+stars.style.display="block";
+moon.style.display="block";
+createStars();
+}else{
+stars.style.display="none";
+moon.style.display="none";
+}
+}
+
+/* Перехват твоего hideAll БЕЗ ломания */
+if(typeof hideAll==="function"){
+const oldHideAll=hideAll;
+hideAll=function(){
+oldHideAll();
+setTimeout(updateNightBackground,50);
+};
+}
+
+setTimeout(updateNightBackground,100);
 </script>
 
 </body>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIP Панель</title>
+<style>
+body{
+  margin:0; padding:0;
+  background:linear-gradient(135deg,#0b0b0b,#1a1a2e);
+  font-family:Arial,sans-serif;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* Звёзды */
+.stars{
+position:fixed;
+top:0; left:0;
+width:100%; height:100%;
+pointer-events:none; overflow:hidden; z-index:0;
+}
+
+.star{
+position:absolute;
+width:2px; height:2px;
+background:white; border-radius:50%;
+animation:twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle{
+from{opacity:0.3} to{opacity:1;}
+}
+
+/* Полумесяц */
+.moon{
+position:fixed; top:20px; right:20px;
+width:90px; height:90px;
+background:#fff; border-radius:50%;
+box-shadow:0 0 40px #fff; z-index:1;
+}
+.moon::after{
+content:"";
+position:absolute; top:0; left:25px;
+width:90px; height:90px; background:#0b0b0b; border-radius:50%;
+}
+
+/* Контейнер VIP */
+#vipContainer{
+  background:rgba(0,0,0,0.85);
+  padding:30px;
+  border-radius:25px;
+  width:90%;
+  max-width:600px;
+  box-shadow:0 0 40px gold;
+  border:2px solid gold;
+  text-align:center;
+  animation:fadeInVIP 1s ease;
+  z-index:2;
+}
+
+#vipContainer h2{
+  color:gold;
+  text-shadow:0 0 15px #ffd700;
+  margin-bottom:20px;
+}
+
+#vipContainer ul{
+  text-align:left; list-style:none; padding:0; margin-bottom:20px;
+}
+
+#vipContainer ul li{
+  margin:10px 0; padding-left:25px; position:relative;
+  font-weight:bold;
+}
+
+#vipContainer ul li::before{
+  content:"💎"; position:absolute; left:0;
+}
+
+#vipContainer button{
+  padding:12px 20px;
+  border:none; border-radius:15px;
+  background:gold; color:#000;
+  font-weight:bold; cursor:pointer;
+  box-shadow:0 0 15px #ffd700;
+  transition:0.3s; margin:5px;
+}
+
+#vipContainer button:hover{
+  background:#ffcc00;
+  box-shadow:0 0 25px #ffd700;
+}
+
+#promoList{
+  max-height:200px; overflow-y:auto; text-align:left;
+  background:rgba(255,255,255,0.05); padding:10px; border-radius:10px;
+  margin-bottom:15px; font-size:14px;
+}
+
+@keyframes fadeInVIP{
+  from{opacity:0; transform:scale(0.9);}
+  to{opacity:1; transform:scale(1);}
+}
+</style>
+</head>
+<body>
+
+<!-- Звёзды и Луна -->
+<div class="stars" id="stars"></div>
+<div class="moon"></div>
+
+<div id="vipContainer">
+  <h2>💎 VIP Панель</h2>
+  <ul>
+    <li>💰 Огромное золото</li>
+    <li>⚔️ Максимальная сила</li>
+    <li>🐾 Все скины разблокированы</li>
+    <li>🎁 Все кейсы открываются сразу</li>
+    <li>🎟️ Все промокоды активны</li>
+  </ul>
+
+  <h3>📜 Все промокоды</h3>
+  <div id="promoList"></div>
+
+  <button onclick="addGold()">+5000 золота</button>
+  <button onclick="addPower()">+50 силы</button>
+  <button onclick="giveAllSkins()">Разблокировать все скины</button>
+  <button onclick="exitVIP()">Выйти</button>
+</div>
+
+<script>
+// ==== ПАРОЛЬ VIP ====
+const VIP_PASSWORD="VIP-7777"; 
+let entered=prompt("🔐 Введите пароль VIP-панели");
+if(entered !== VIP_PASSWORD){
+  alert("🚫 Неверный пароль");
+  window.location.href="index.html"; 
+}
+
+// ==== ЗВЁЗДЫ ====
+function createStars(){
+  const container=document.getElementById("stars");
+  container.innerHTML="";
+  for(let i=0;i<100;i++){
+    const star=document.createElement("div");
+    star.className="star";
+    star.style.top=Math.random()*100+"%";
+    star.style.left=Math.random()*100+"%";
+    star.style.animationDuration=(Math.random()*3+1)+"s";
+    container.appendChild(star);
+  }
+}
+createStars();
+
+// ==== ПРОМОКОДЫ ====
+const promos={};
+for(let i=1;i<=150;i++){
+  if(i%3===0) promos['GOLD'+i]={type:'gold',value:i*10};
+  else if(i%3===1) promos['POWER'+i]={type:'power',value:Math.floor(i/2)};
+  else promos['SKIN'+i]={type:'skin',value:'🐱'}; 
+}
+
+function renderPromos(){
+  const list=document.getElementById("promoList");
+  list.innerHTML="";
+  Object.keys(promos).forEach(k=>{
+    list.innerHTML += `${k} → ${promos[k].type} +${promos[k].value}<br>`;
+  });
+}
+renderPromos();
+
+// ==== БОНУСЫ ====
+function addGold(){
+  if(typeof gold!=="undefined"){ gold+=5000; if(typeof save==="function") save(); if(typeof update==="function") update();}
+}
+function addPower(){
+  if(typeof power!=="undefined"){ power+=50; if(typeof save==="function") save(); if(typeof update==="function") update();}
+}
+function giveAllSkins(){
+  if(typeof skinsData!=="undefined"){
+    skinsData.forEach(s=>{ localStorage.skin=s; });
+    if(typeof save==="function") save(); if(typeof update==="function") update();
+  }
+}
+
+// ==== ВЫХОД ====
+function exitVIP(){ window.location.href="index.html"; }
+</script>
+
+</body>
+</html>
