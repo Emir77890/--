@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sniper Mobile</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+background:#000;
+overflow:hidden;
+font-family:Arial,sans-serif;
+color:white;
+touch-action:manipulation;
+}
+
+canvas{
+display:block;
+background:radial-gradient(circle,#111,#000);
+}
+
+/* UI */
+#ui{
+position:fixed;
+top:10px;
+left:10px;
+font-size:16px;
+z-index:5;
+background:rgba(0,0,0,0.6);
+padding:10px;
+border-radius:10px;
+}
+
+#menu{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#000;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+z-index:10;
+}
+
+#menu h1{
+font-size:32px;
+margin-bottom:20px;
+}
+
+button{
+width:80%;
+max-width:300px;
+padding:15px;
+margin:10px;
+font-size:18px;
+border:none;
+border-radius:15px;
+background:red;
+color:white;
+}
+
+button:active{
+transform:scale(0.95);
+background:darkred;
+}
+</style>
+</head>
+<body>
+
+<div id="ui">
+🎯 <span id="score">0</span><br>
+⏳ <span id="time">30</span><br>
+🏆 <span id="best">0</span>
+</div>
+
+<div id="menu">
+<h1>🎯 SNIPER MOBILE</h1>
+<button onclick="startGame()">Играть</button>
+</div>
+
+<canvas id="game"></canvas>
+
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+}
+resize();
+window.addEventListener("resize",resize);
+
+let score=0;
+let best=localStorage.bestSniperMobile || 0;
+let timeLeft=30;
+let gameRunning=false;
+let targets=[];
+
+document.getElementById("best").textContent=best;
+
+function createTarget(){
+let size=50+Math.random()*30;
+targets.push({
+x:Math.random()*(canvas.width-size),
+y:Math.random()*(canvas.height-size),
+size:size,
+speedX:(Math.random()-0.5)*4,
+speedY:(Math.random()-0.5)*4
+});
+}
+
+function drawTarget(t){
+ctx.beginPath();
+ctx.arc(t.x+t.size/2,t.y+t.size/2,t.size/2,0,Math.PI*2);
+ctx.fillStyle="red";
+ctx.fill();
+
+ctx.beginPath();
+ctx.arc(t.x+t.size/2,t.y+t.size/2,t.size/4,0,Math.PI*2);
+ctx.fillStyle="white";
+ctx.fill();
+}
+
+function updateTargets(){
+targets.forEach(t=>{
+t.x+=t.speedX;
+t.y+=t.speedY;
+
+if(t.x<0||t.x+t.size>canvas.width) t.speedX*=-1;
+if(t.y<0||t.y+t.size>canvas.height) t.speedY*=-1;
+});
+}
+
+function draw(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+targets.forEach(drawTarget);
+}
+
+function gameLoop(){
+if(!gameRunning) return;
+updateTargets();
+draw();
+requestAnimationFrame(gameLoop);
+}
+
+/* ТАП управление */
+canvas.addEventListener("touchstart",e=>{
+if(!gameRunning) return;
+let touch=e.touches[0];
+let rect=canvas.getBoundingClientRect();
+let mx=touch.clientX-rect.left;
+let my=touch.clientY-rect.top;
+
+targets.forEach((t,index)=>{
+let dx=mx-(t.x+t.size/2);
+let dy=my-(t.y+t.size/2);
+let dist=Math.sqrt(dx*dx+dy*dy);
+if(dist<t.size/2){
+score++;
+targets.splice(index,1);
+createTarget();
+document.getElementById("score").textContent=score;
+}
+});
+});
+
+function startGame(){
+score=0;
+timeLeft=30;
+targets=[];
+for(let i=0;i<3;i++) createTarget();
+gameRunning=true;
+
+document.getElementById("score").textContent=score;
+document.getElementById("time").textContent=timeLeft;
+document.getElementById("menu").style.display="none";
+
+let timer=setInterval(()=>{
+timeLeft--;
+document.getElementById("time").textContent=timeLeft;
+
+if(timeLeft<=0){
+clearInterval(timer);
+endGame();
+}
+},1000);
+
+gameLoop();
+}
+
+function endGame(){
+gameRunning=false;
+
+if(score>best){
+best=score;
+localStorage.bestSniperMobile=best;
+}
+
+document.getElementById("best").textContent=best;
+document.getElementById("menu").style.display="flex";
+}
+</script>
+
+</body>
+</html>
