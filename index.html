@@ -446,9 +446,9 @@ setTimeout(updateNightBackground,100);
 <button onclick="openProfile()">Профиль</button>
 <button> <a href="oi.html">VIP Панель</a>VIP Панель</button>
 <button onclick="openAdmin()">Админ</button>
- <a href="ii.html">Драка с боссом</a>
-  <a href="tyf.html">Игра снайпер</a>
-   <a href="ERT.HTML"></a>
+ <button><a href="ii.html">Драка с боссом</a></button>
+ <button> <a href="tyf.html">Игра снайпер</a></button>
+   <button><a href="оо.html">Космический летчик</a></button>
 <div id="miniIphone">
 <div class="mini-phone">
 <div style="width:60px;height:6px;background:#555;border-radius:3px;margin-bottom:10px;"></div>
@@ -582,7 +582,7 @@ requestAnimationFrame(updateFPS);
       return trigger("Нечеловеческая скорость кликов");
     }
   }
-}
+
 
 function trigger(reason) {
   acBlocked = true;
@@ -706,6 +706,90 @@ function lockScreen(reason) {
 <!-- Админка -->
 <div id="admin">
 <h2>🔧 Админ-панель</h2>
+<script>
+/* ===== СЧЁТЧИК ИГРОКОВ (БЕЗ СЕРВЕРА, ЧЕРЕЗ LOCAL + TAB) ===== */
+
+// Уникальный ID устройства
+let playerId = localStorage.playerId;
+if (!playerId) {
+  playerId = "player_" + Math.random().toString(36).substring(2);
+  localStorage.playerId = playerId;
+}
+
+// Ключи
+const ONLINE_KEY = "blade_online_players";
+const TODAY_KEY = "blade_today_sessions";
+
+// Получаем текущих онлайн игроков
+function getOnlinePlayers() {
+  const data = JSON.parse(localStorage.getItem(ONLINE_KEY) || "{}");
+  return data;
+}
+
+// Сохраняем онлайн
+function setOnlinePlayers(data) {
+  localStorage.setItem(ONLINE_KEY, JSON.stringify(data));
+}
+
+// Игрок зашёл в игру
+function playerJoin() {
+  let online = getOnlinePlayers();
+  online[playerId] = Date.now();
+  setOnlinePlayers(online);
+
+  // Счётчик за день
+  let today = JSON.parse(localStorage.getItem(TODAY_KEY) || "[]");
+  const todayDate = new Date().toDateString();
+
+  if (!today.includes(playerId + todayDate)) {
+    today.push(playerId + todayDate);
+    localStorage.setItem(TODAY_KEY, JSON.stringify(today));
+  }
+}
+
+// Игрок вышел (закрыл вкладку)
+window.addEventListener("beforeunload", () => {
+  let online = getOnlinePlayers();
+  delete online[playerId];
+  setOnlinePlayers(online);
+});
+
+// Очистка старых игроков (если вкладку закрыли криво)
+function cleanupOnline() {
+  let online = getOnlinePlayers();
+  const now = Date.now();
+
+  for (let id in online) {
+    if (now - online[id] > 10000) { // 10 сек неактивен
+      delete online[id];
+    }
+  }
+  setOnlinePlayers(online);
+}
+
+// Обновление UI в админке
+function updateAdminStats() {
+  cleanupOnline();
+
+  const online = getOnlinePlayers();
+  const today = JSON.parse(localStorage.getItem(TODAY_KEY) || "[]");
+
+  const onlineCountEl = document.getElementById("onlineCount");
+  const totalCountEl = document.getElementById("totalCount");
+
+  if (onlineCountEl) {
+    onlineCountEl.textContent = Object.keys(online).length;
+  }
+
+  if (totalCountEl) {
+    totalCountEl.textContent = today.length;
+  }
+}
+
+// Запуск
+playerJoin();
+setInterval(updateAdminStats, 1000);
+</script>
 <input id="adminGold" type="number" placeholder="Золото">
 <button onclick="setGold()">Установить золото</button><br>
 <input id="adminPower" type="number" placeholder="Сила">
@@ -1075,7 +1159,7 @@ setTimeout(updateNightBackground,100);
 <script>
 (function(){
 
-const GAME_VERSION = "1.3"; // меняй при каждом обновлении
+const GAME_VERSION = "1.5"; // меняй при каждом обновлении
 
 const PATCH_NOTES = [
 "🔥 Добавлена новая VIP панель",
@@ -1170,6 +1254,7 @@ localStorage.setItem("gameVersion", GAME_VERSION);
 }
 
 })();
+}
 </script>
 </body>
 </html>

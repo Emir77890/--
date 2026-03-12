@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>TodicML IDE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: monospace;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    h2 { color: #0ff; margin: 10px; }
+    #editor {
+      flex: 1;
+      background: #1e1e1e;
+      color: #f8f8f2;
+      border-radius: 8px;
+      padding: 10px;
+      overflow-y: auto;
+      outline: none;
+      white-space: pre-wrap;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      background: #0f0;
+      color: #000;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover { background: #8f8; }
+
+    /* Консоль */
+    #console {
+      height: 150px;
+      background: #000;
+      color: #0f0;
+      padding: 5px;
+      overflow-y: auto;
+      border-top: 2px solid #0f0;
+      font-size: 14px;
+    }
+    #console-input {
+      width: 100%;
+      background: #111;
+      border: none;
+      color: #0f0;
+      padding: 5px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    /* Матрица */
+    #matrixCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      z-index: 999;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>🌀 TodicML IDE</h2>
+
+  <pre><code id="editor" class="language-html" contenteditable="true">
+<window>
+  <header>
+  </header>
+</window>
+  </code></pre>
+
+  <button onclick="runCode()">▶ Запустить</button>
+
+  <!-- Консоль -->
+  <div id="console">
+    <div>> Консоль запущена. Введите help для списка команд.</div>
+  </div>
+  <input id="console-input" type="text" placeholder="Введите команду и нажмите Enter">
+
+  <!-- Матрица -->
+  <canvas id="matrixCanvas"></canvas>
+
+  <script>
+    // Подсветка
+    document.addEventListener("DOMContentLoaded", () => hljs.highlightAll());
+
+   function parseTodic(code) {
+  return code
+    // 🔹 Заголовок
+    .replace(/<h1>(.*?)<\/h1>/g, "<h1 style='color:lime;'>$1</h1>")
+
+    // 🔹 Кнопка
+    .replace(/<button>(.*?)<\/button>/g, "<button style='background:#222;color:#0f0;border:1px solid #0f0;padding:5px 10px;'>$1</button>")
+
+    // 🔹 Абзац
+    .replace(/<p>(.*?)<\/p>/g, "<p style='color:white;font-family:monospace;'>$1</p>")
+
+    // 🔹 Ссылка
+    .replace(/<link href="(.?)">(.?)<\/link>/g, "<a href='$1' target='_blank' style='color:cyan;'>$2</a>")
+
+    // 🔹 Картинка
+    .replace(/<img src="(.?)" alt="(.?)">/g, "<img src='$1' alt='$2' style='max-width:200px;border:2px solid #0f0;'>")
+
+    // 🔹 Список
+    .replace(/<list>([\s\S]*?)<\/list>/g, "<ul style='color:orange;'>$1</ul>")
+    .replace(/<item>(.*?)<\/item>/g, "<li>$1</li>")
+
+    // 🔹 Код
+    .replace(/<code>([\s\S]*?)<\/code>/g, "<pre style='background:black;color:#0f0;padding:10px;border-radius:5px;'><code>$1</code></pre>")
+
+    // ================================
+    // 🚀 Новые теги для кибербезопасности
+    // ================================
+
+    // Тег <scan> — сканирование уязвимостей
+    .replace(/<scan>(.*?)<\/scan>/g, "<div style='color:yellow;'>[СКАНИРУЮ...] $1 ✅</div>")
+
+    // Тег <encrypt> — шифрование
+    .replace(/<encrypt>(.*?)<\/encrypt>/g, "<div style='color:lightgreen;'>🔐 Зашифровано: <code>$1</code></div>")
+
+    // Тег <firewall> — фаервол
+    .replace(/<firewall>(.*?)<\/firewall>/g, "<div style='color:red;background:black;padding:5px;'>🛡 FIREWALL: $1</div>")
+
+    // Тег <hack> — запуск "атаки"
+    .replace(/<hack>(.*?)<\/hack>/g, "<div style='color:#0f0;background:#111;padding:5px;'>💻 Взлом выполняется: $1...</div>")
+
+    // Тег <password> — генерация пароля
+    .replace(/<password>(.*?)<\/password>/g, "<div style='color:cyan;'>🔑 Пароль: $1</div>")
+
+    // Тег <alert> — предупреждение
+    .replace(/<alert>(.*?)<\/alert>/g, "<div style='color:red;font-weight:bold;'>⚠ $1 ⚠</div>")
+
+    // Тег <python> — вывод Python кода
+    .replace(/<python>([\s\S]*?)<\/python>/g, "<pre style='background:#333;color:#ffcc00;padding:10px;'><code>Python: $1</code></pre>")
+
+    // Тег <php> — вывод PHP кода
+    .replace(/<php>([\s\S]*?)<\/php>/g, "<pre style='background:#333;color:#00ccff;padding:10px;'><code>PHP: $1</code></pre>")
+
+    // Тег <spp> — вывод S++ кода
+    .replace(/<spp>([\s\S]*?)<\/spp>/g, "<pre style='background:#222;color:#ff0066;padding:10px;'><code>S++: $1</code></pre>")
+
+    // Тег <js> — вывод JavaScript кода
+    .replace(/<js>([\s\S]*?)<\/js>/g, "<pre style='background:#222;color:#0ff;padding:10px;'><code>JS: $1</code></pre>");
+}
+
+
+    // Кнопка "Запустить"
+    function runCode() {
+      let code = document.getElementById("editor").innerText;
+      let parsed = parseTodic(code);
+      let newWin = window.open("", "_blank");
+      newWin.document.write("<body>"+parsed+"</body>");
+      newWin.document.close();
+       const letters = "01ЙЦУКЕНmatrixDATA";
+      const fontSize = 16;
+      const columns = canvas.width / fontSize;
+      const drops = Array(Math.floor(columns)).fill(1);
+      const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+    let matrixInterval;
+
+    function startMatrix() {
+      canvas.style.display = "block";
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const letters = "01ЙЦУКЕНmatrixDATA";
+      const fontSize = 16;
+      const columns = canvas.width / fontSize;
+      const drops = Array(Math.floor(columns)).fill(1);
+
+      function draw() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#0ff";
+        ctx.font = fontSize + "px monospace";
+
+        for (let i = 0; i < drops.length; i++) {
+          let text = letters[Math.floor(Math.random() * letters.length)];
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      }
+
+      matrixInterval = setInterval(draw, 50);
+    }
+
+    function stopMatrix() {
+      clearInterval(matrixInterval);
+      canvas.style.display = "none";
+    }
+    }
+
+    // Консоль
+    const consoleDiv = document.getElementById("console");
+    const consoleInput = document.getElementById("console-input");
+
+    consoleInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        let cmd = consoleInput.value.trim();
+        consoleInput.value = "";
+        executeCommand(cmd);
+      }
+    });
+
+    function logToConsole(msg) {
+      let div = document.createElement("div");
+      div.textContent = "> " + msg;
+      consoleDiv.appendChild(div);
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+
+    function executeCommand(cmd) {
+      if (cmd === "help") {
+        logToConsole("Команды: help, tag matrix");
+      } else if (cmd === "tag matrix") {
+        startMatrix();
+        setTimeout(() => {
+          stopMatrix();
+          logToConsole("Анализ завершен.");
+          logToConsole("Ошибок: 0 | Всё правильно ✔");
+        }, 5000);
+      } else {
+        logToConsole("Неизвестная команда: " + cmd);
+      }
+    }
+    
+  
+
+
+    // Матрица
+    const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+    let matrixInterval;
+
+    function startMatrix() {
+      canvas.style.display = "block";
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const letters = "01ЙЦУКЕНmatrixDATA";
+      const fontSize = 16;
+      const columns = canvas.width / fontSize;
+      const drops = Array(Math.floor(columns)).fill(1);
+
+      function draw() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#0ff";
+        ctx.font = fontSize + "px monospace";
+
+        for (let i = 0; i < drops.length; i++) {
+          let text = letters[Math.floor(Math.random() * letters.length)];
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      }
+
+      matrixInterval = setInterval(draw, 50);
+    }
+
+    function stopMatrix() {
+      clearInterval(matrixInterval);
+      canvas.style.display = "none";
+    }
+  </script>
+</body>
+</html>

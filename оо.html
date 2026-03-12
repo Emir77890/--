@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Космический Лётчик Универсальный</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;
+  overflow:hidden;
+  background:black;
+  font-family:Arial;
+}
+#gameCanvas{
+  display:block;
+  margin:0 auto;
+  background:#000;
+  touch-action:none;
+}
+#score{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  color:white;
+  font-size:24px;
+}
+#bonus{
+  position:absolute;
+  top:50px;
+  left:50%;
+  transform:translateX(-50%);
+  color:lime;
+  font-size:18px;
+}
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="500" height="700"></canvas>
+<div id="score">Очки: 0</div>
+<div id="bonus"></div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let player = {x:230, y:650, width:40, height:40, shield:false};
+let stars = [];
+let asteroids = [];
+let bonuses = [];
+let score = 0;
+let speed = 2;
+let bonusText = "";
+let touchX = player.x;
+let keys = {};
+
+// Управление клавишами для ПК
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+// Сенсорное управление для телефона
+canvas.addEventListener("touchmove", e=>{
+  touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left - player.width/2;
+});
+
+// Коллизии
+function collide(a,b){
+  return a.x < b.x+b.width &&
+         a.x+a.width > b.x &&
+         a.y < b.y+b.height &&
+         a.y+a.height > b.y;
+}
+
+// Спавн объектов
+function spawnStar(){ stars.push({x:Math.random()*(canvas.width-20),y:0,width:20,height:20}); }
+function spawnAsteroid(){ asteroids.push({x:Math.random()*(canvas.width-30),y:0,width:30,height:30}); }
+function spawnBonus(){
+  let types = ["shield","speed","magnet"];
+  bonuses.push({x:Math.random()*(canvas.width-30),y:0,width:25,height:25,type:types[Math.floor(Math.random()*types.length)]});
+}
+
+// Активируем бонус
+function activateBonus(type){
+  if(type=="shield"){ player.shield=true; bonusText="Щит активен!"; setTimeout(()=>{player.shield=false; bonusText="";},5000); }
+  else if(type=="speed"){ speed += 1; bonusText="Ускорение!"; setTimeout(()=>{speed -= 1; bonusText="";},5000); }
+  else if(type=="magnet"){ bonusText="Магнит!"; let magnetInterval=setInterval(()=>{stars.forEach(s=>s.x=player.x+player.width/2-s.width/2);},50); setTimeout(()=>{clearInterval(magnetInterval); bonusText="";},5000);}
+  document.getElementById("bonus").innerText=bonusText;
+}
+
+// Игровой цикл
+function gameLoop(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Движение игрока
+  // ПК
+  if(keys["ArrowLeft"] || keys["a"]) player.x -= 5;
+  if(keys["ArrowRight"] || keys["d"]) player.x += 5;
+  // Мобильный
+  player.x += (touchX - player.x)*0.2;
+  if(player.x<0) player.x=0;
+  if(player.x+player.width>canvas.width) player.x=canvas.width-player.width;
+
+  // Игрок
+  ctx.fillStyle=player.shield?"cyan":"#0ef";
+  ctx.fillRect(player.x,player.y,player.width,player.height);
+
+  // Звёзды
+  stars.forEach((s,i)=>{
+    s.y += speed;
+    ctx.fillStyle="yellow";
+    ctx.fillRect(s.x,s.y,s.width,s.height);
+    if(collide(player,s)){ score++; stars.splice(i,1); document.getElementById("score").innerText="Очки: "+score; }
+    if(s.y>canvas.height) stars.splice(i,1);
+  });
+
+  // Астероиды
+  asteroids.forEach((a,i)=>{
+    a.y += speed;
+    ctx.fillStyle="red";
+    ctx.fillRect(a.x,a.y,a.width,a.height);
+    if(collide(player,a)){
+      if(player.shield){ asteroids.splice(i,1); }
+      else{ alert("Игра окончена! Очки: "+score); location.reload(); }
+    }
+    if(a.y>canvas.height) asteroids.splice(i,1);
+  });
+
+  // Бонусы
+  bonuses.forEach((b,i)=>{
+    b.y += speed;
+    ctx.fillStyle=b.type=="shield"?"cyan":b.type=="speed"?"orange":"lime";
+    ctx.fillRect(b.x,b.y,b.width,b.height);
+    if(collide(player,b)){ activateBonus(b.type); bonuses.splice(i,1); }
+    if(b.y>canvas.height) bonuses.splice(i,1);
+  });
+
+  requestAnimationFrame(gameLoop);
+}
+
+// Таймеры
+setInterval(spawnStar,1000);
+setInterval(spawnAsteroid,1500);
+setInterval(spawnBonus,8000);
+setInterval(()=>{speed += 0.1;},7000);
+
+gameLoop();
+</script>
+
+</body>
+</html>
