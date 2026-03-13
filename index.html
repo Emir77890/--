@@ -1159,7 +1159,7 @@ setTimeout(updateNightBackground,100);
 <script>
 (function(){
 
-const GAME_VERSION = "1.5"; // меняй при каждом обновлении
+const GAME_VERSION = "2.0"; // меняй при каждом обновлении
 
 const PATCH_NOTES = [
 "🔥 Добавлена новая VIP панель",
@@ -1170,11 +1170,10 @@ const PATCH_NOTES = [
 "Игра снайперы"
 ];
 
-window.addEventListener("load", function(){
-let savedVersion = localStorage.getItem("gameVersion");
-if(savedVersion !== GAME_VERSION){
+window.addEventListener("load", function()
+{
     startUpdate();
-}
+
 });
 
 function startUpdate(){
@@ -1219,7 +1218,7 @@ document.body.appendChild(overlay);
 /* ===== БЫСТРАЯ ЗАГРУЗКА (20–40 сек) ===== */
 
 let hardware = navigator.hardwareConcurrency || 2;
-let baseSpeed = 120 - (hardware * 10);
+letbaseSpeed = 120 - (hardware * 10);
 if(baseSpeed < 40) baseSpeed = 40;
 
 let percent = 0;
@@ -1256,5 +1255,6 @@ localStorage.setItem("gameVersion", GAME_VERSION);
 })();
 }
 </script>
+
 </body>
 </html>
