@@ -452,8 +452,10 @@ fetch('http://localhost:3000/register', {
 </div>
 
 <script>
-
-
+{
+  if (registerCount <3 )
+  document.getElementById('login').style.display = 'block'} 
+letregisterCount  = localStorage.getItem ||  0 ; 
 async function register() {
   const nick = document.getElementById("nickInput").value;
   const email = document.getElementById("emailInput").value;
@@ -471,8 +473,9 @@ async function register() {
 
   const data = await res.json();
 
-  localStorage.nick = nick;
-
+  localStorage.nick = nick ;
+  registerCount++;
+  localStorage.setItem('registerCount', registerCount);
   alert("OK");
   hideAll();
   document.getElementById("menu").style.display = "block";
