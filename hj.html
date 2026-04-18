@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Blade Clicker</title>
+</head>
+
+<body style="font-family: Arial; text-align:center;">
+
+    <h1>🎮 Blade Clicker</h1>
+
+    <h3>Войти в игру</h3>
+
+    <input id="nickname" placeholder="Введите ник"><br><br>
+
+    <button onclick="login()">Войти</button>
+
+    <br><br>
+
+    <button onclick="loginGoogle()">Войти через Google</button>
+    <button onclick="loginApple()">Войти через Apple</button>
+
+    <hr>
+
+    <button onclick="openDev()">🧑‍💻 DEV PANEL</button>
+
+    <script>
+        // ===== вход в игру =====
+        function login() {
+            fetch('/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    nickname: document.getElementById('nickname').value
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.allowed) {
+                    alert("🚫 БАН: " + data.reason);
+                } else {
+                    alert("✅ Добро пожаловать!");
+                }
+            });
+        }
+
+        // ===== Google вход =====
+        function loginGoogle() {
+            window.location.href = "/auth/google";
+        }
+
+        // ===== Apple вход =====
+        function loginApple() {
+            window.location.href = "/auth/apple";
+        }
+
+        // ===== dev панель =====
+        function openDev() {
+            window.location.href = "/dev";
+        }
+    </script>
+
+</body>
+</html>

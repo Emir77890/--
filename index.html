@@ -427,16 +427,58 @@ if(typeof hideAll==="function"){
 }
 
 setTimeout(updateNightBackground,100);
+fetch('http://localhost:3000/register', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    nickname: "Test",
+    email: "test@mail.com"
+  })
+});
 </script>
 
 
 
 <!-- Регистрация -->
 <div id="login">
-<h2>Введите никнейм</h2>
-<input id="nickInput" placeholder="Ник">
-<button onclick="login()">Играть</button>
+  <h2>Регистрация</h2>
+
+  <input id="nickInput" placeholder="Ник"><br><br>
+  <input id="emailInput" placeholder="Email"><br><br>
+
+  <button onclick="register()">Играть</button>
 </div>
+
+<script>
+
+
+async function register() {
+  const nick = document.getElementById("nickInput").value;
+  const email = document.getElementById("emailInput").value;
+
+  if (!nick || !email) {
+    alert("Заполни всё");
+    return;
+  }
+
+  const res = await fetch("http://localhost:3000/register", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ nick, email })
+  });
+
+  const data = await res.json();
+
+  localStorage.nick = nick;
+
+  alert("OK");
+  hideAll();
+  document.getElementById("menu").style.display = "block";
+}
+
+</script>
 
 <!-- Меню -->
 <div id="menu">
@@ -444,7 +486,7 @@ setTimeout(updateNightBackground,100);
 <button onclick="openGame()">Играть</button>
 <button onclick="openShop()">Магазин</button>
 <button onclick="openProfile()">Профиль</button>
-<button> <a href="oi.html">VIP Панель</a>VIP Панель</button>
+<button> <a href="oi.html">VIP панель</a></button>
 <button onclick="openAdmin()">Админ</button>
  <button><a href="ii.html">Драка с боссом</a></button>
  <button> <a href="tyf.html">Игра снайпер</a></button>
@@ -467,8 +509,111 @@ setTimeout(updateNightBackground,100);
 <button onclick="backFromMiniGames()">Назад в меню</button>
 <div id="miniGameResult" style="margin-top:15px;color:#0f0;"></div>
 </div>
+<div id="iphone-terminal" style="width: 100%; height: 100%; display: flex; flex-direction: column; padding: 5px;">
+    
+    <div id="request-form-ui" style="display: block;">
+        <p style="font-size: 10px; color: #00ff41; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; text-align:center;">📩 FORM CENTER</p>
+        
+        <input type="text" id="p-name" placeholder="Ваше Имя" style="width: 90%; background: #222; border: 1px solid #444; color: #fff; font-size: 10px; padding: 4px; border-radius: 5px; margin-bottom: 4px; outline: none;">
+        
+        <input type="number" id="p-age" placeholder="Возраст" style="width: 90%; background: #222; border: 1px solid #444; color: #fff; font-size: 10px; padding: 4px; border-radius: 5px; margin-bottom: 4px; outline: none;">
+        
+        <input type="email" id="p-mail" placeholder="Ваш Email" style="width: 90%; background: #222; border: 1px solid #444; color: #fff; font-size: 10px; padding: 4px; border-radius: 5px; margin-bottom: 4px; outline: none;">
+        
+        <textarea id="p-reason" placeholder="Зачем вам доступ?" style="width: 90%; height: 40px; background: #222; border: 1px solid #444; color: #fff; font-size: 10px; padding: 4px; border-radius: 5px; margin-bottom: 6px; resize: none; outline: none;"></textarea>
+        
+        <button id="p-submit-btn" onclick="sendIphoneData()" style="width: 90%; background: #00ff41; color: #000; border: none; padding: 8px; font-size: 10px; font-weight: bold; border-radius: 5px; cursor: pointer;">ОТПРАВИТЬ</button>
+    </div>
+
+    <div id="request-wait-ui" style="display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 5px;">
+        <span style="font-size: 20px; margin-bottom: 5px;">✅</span>
+        <p style="color: #00ff41; font-size: 10px; font-weight: bold; text-align: center;">ОТПРАВЛЕНО!</p>
+        <p style="color: #fff; font-size: 9px; margin-top: 5px; text-align: center; opacity: 0.8;">
+            Ответ придет на почту.
+        </p>
+        <div id="cooldown-timer" style="margin-top: 10px; font-size: 10px; color: #ffd700;">
+            Новая заявка через: <span id="timer-sec">10</span>с
+        </div>
+    </div>
+</div>
 
 <script>
+const API_URL = "https://formspree.io/f/xpqkdlyr";
+
+async function sendIphoneData() {
+    const n = document.getElementById('p-name');
+    const a = document.getElementById('p-age');
+    const m = document.getElementById('p-mail');
+    const r = document.getElementById('p-reason');
+    const btn = document.getElementById('p-submit-btn');
+
+    if (!n.value || !a.value || !m.value || !r.value) return alert("Заполни все поля!");
+    if (!m.value.includes('@')) return alert("Введите корректный Email!");
+
+    btn.disabled = true;
+    btn.innerText = "СВЯЗЬ...";
+
+    const payload = {
+        type: "MULTI_REQUEST",
+        name: n.value,
+        age: a.value,
+        email: m.value,
+        reason: r.value,
+        gold: typeof gold !== 'undefined' ? gold : 0,
+        nick: localStorage.nick || "Guest"
+    };
+
+    try {
+        await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        // Показываем экран успеха
+        document.getElementById('request-form-ui').style.display = 'none';
+        document.getElementById('request-wait-ui').style.display = 'flex';
+
+        // Запуск таймера на 10 секунд
+        let timeLeft = 10;
+        const timerElem = document.getElementById('timer-sec');
+        
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerElem.innerText = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                resetIphoneForm();
+            }
+        }, 1000);
+
+    } catch (e) {
+        alert("Ошибка. Попробуй еще раз.");
+        btn.disabled = false;
+        btn.innerText = "ОТПРАВИТЬ";
+    }
+}
+
+function resetIphoneForm() {
+    // Очищаем поля
+    document.getElementById('p-name').value = "";
+    document.getElementById('p-age').value = "";
+    document.getElementById('p-mail').value = "";
+    document.getElementById('p-reason').value = "";
+    
+    // Возвращаем кнопку в строй
+    const btn = document.getElementById('p-submit-btn');
+    btn.disabled = false;
+    btn.innerText = "ОТПРАВИТЬ";
+
+    // Переключаем экраны обратно
+    document.getElementById('request-form-ui').style.display = 'block';
+    document.getElementById('request-wait-ui').style.display = 'none';
+}
+</script>
+<script>
+  
 // ==== Мини-игры ====
 
 function game1(){
@@ -702,7 +847,169 @@ function lockScreen(reason) {
 </ul>
 <button onclick="back()">Назад</button>
 </div>
+<!--Разработчик-->
+<div id="admin">
+<h2>🛠 Панель разработчика</h2>
 
+<div style="background:#111;padding:15px;border-radius:12px;">
+  <input id="aLogin" placeholder="Логин">
+  <input id="aPass" type="password" placeholder="Пароль">
+  <button onclick="loginAdmin()">Войти</button>
+</div>
+
+<hr>
+
+<div style="margin-top:10px;">
+  <button onclick="loadUsers()">🔄 Обновить</button>
+</div>
+
+<div id="usersList"></div>
+
+<button onclick="back()">⬅ Назад</button>
+</div>
+
+<script>
+let token = "";
+
+// вход
+async function loginAdmin() {
+  const res = await fetch("http://localhost:3000/admin/login", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      login: document.getElementById("aLogin").value,
+      password: document.getElementById("aPass").value
+    })
+  });
+
+  const data = await res.json();
+
+  if (!data.token) {
+    alert("❌ Неверный логин или пароль");
+    return;
+  }
+
+  token = data.token;
+  alert("✅ Вход выполнен");
+  loadUsers();
+}
+
+// загрузка игроков
+async function loadUsers() {
+  const res = await fetch("http://localhost:3000/admin/users", {
+    headers: { authorization: token }
+  });
+
+  const users = await res.json();
+
+  const list = document.getElementById("usersList");
+  list.innerHTML = "";
+
+  users.reverse().forEach(u => {
+    list.innerHTML += `
+      <div style="
+        background:#1a1a1a;
+        margin:8px;
+        padding:10px;
+        border-radius:10px;
+        box-shadow:0 0 10px #000;
+      ">
+        👤 <b>${u.nick}</b><br>
+        📧 ${u.email}<br>
+        🌐 IP: ${u.ip}<br>
+        🕒 ${u.date}<br>
+        🚫 Статус: ${u.banned ? "BAN" : "OK"}<br><br>
+
+        <button onclick="ban('${u.email}')">🚫 Бан</button>
+      </div>
+    `;
+  });
+}
+
+// бан
+async function ban(email) {
+  await fetch("http://localhost:3000/admin/ban", {
+    method: "POST",
+    headers: {
+      "Content-Type":"application/json"
+    },
+    body: JSON.stringify({ email })
+  });
+
+  loadUsers();
+}
+</script>
+<!-- Разраб панель-->
+ <!-- КНОПКА ОТКРЫТИЯ -->
+<button onclick="openDev()" style="position:fixed;top:10px;right:10px;z-index:9999;">
+⚙️
+</button>
+
+<!-- ОКНО ВВОДА ПАРОЛЯ -->
+<div id="devLogin" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#0f0;z-index:10000;text-align:center;padding-top:200px;">
+    <h2>Вход в Dev Panel</h2>
+    <input type="password" id="devPass" placeholder="Пароль">
+    <br><br>
+    <button onclick="checkPass()">Войти</button>
+</div>
+
+<!-- ПАНЕЛЬ -->
+<div id="devPanel" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#050505;color:#00ff41;z-index:10001;padding:20px;font-family:monospace;">
+    
+    <h2>DEV PANEL</h2>
+
+    <textarea id="devText" placeholder="Пиши что хочешь..." style="width:100%;height:100px;"></textarea>
+    <br><br>
+    <button onclick="saveText()">Сохранить</button>
+    <button onclick="closeDev()">Закрыть</button>
+
+    <h3>История:</h3>
+    <div id="devLog" style="max-height:200px;overflow:auto;border:1px solid #0f0;padding:10px;"></div>
+</div>
+
+<script>
+const DEV_PASSWORD = "12345"; // ← поменяй
+
+function openDev() {
+    document.getElementById("devLogin").style.display = "block";
+}
+
+function checkPass() {
+    const pass = document.getElementById("devPass").value;
+
+    if (pass === DEV_PASSWORD) {
+        document.getElementById("devLogin").style.display = "none";
+        document.getElementById("devPanel").style.display = "block";
+        loadLog();
+    } else {
+        alert("Неверный пароль");
+    }
+}
+
+function closeDev() {
+    document.getElementById("devPanel").style.display = "none";
+}
+
+function saveText() {
+    const text = document.getElementById("devText").value;
+    if (!text) return;
+
+    let logs = JSON.parse(localStorage.getItem("devLogs")) || [];
+    logs.push(text);
+
+    localStorage.setItem("devLogs", JSON.stringify(logs));
+
+    document.getElementById("devText").value = "";
+    loadLog();
+}
+
+function loadLog() {
+    let logs = JSON.parse(localStorage.getItem("devLogs")) || [];
+    const logDiv = document.getElementById("devLog");
+
+    logDiv.innerHTML = logs.map(t => `<div>> ${t}</div>`).join("");
+}
+</script>
 <!-- Админка -->
 <div id="admin">
 <h2>🔧 Админ-панель</h2>
