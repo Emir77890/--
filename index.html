@@ -340,7 +340,7 @@ to{transform:translate(-50%,0);opacity:1;}
 <div class="moon" id="moon"></div>
 <div class="tasbih" id="tasbih"></div>
 <div class="mini-greeting" id="ramadanGreeting">
-🤲 Ассаляму алейкум! Добро пожаловать! 🌙✨
+   Регистрацию проходим 1 раз!
 </div>
 
 <script>
@@ -437,10 +437,34 @@ fetch('http://localhost:3000/register', {
     email: "test@mail.com"
   })
 });
+
 </script>
 
 
+<div id="regSection">
+    <button onclick="window.location.href='pamel.html'">Регистрация</button> 
+</div>
 
+<script>
+(function() {
+    const isRegistered = localStorage.getItem('isRegistered');
+    const lastLogin = localStorage.getItem('lastLogin');
+    const now = Date.now();
+    const week = 7 * 24 * 60 * 60 * 1000; // 7 дней
+
+    if (isRegistered === 'true' && lastLogin) {
+        if (now - parseInt(lastLogin) < week) {
+            // Если зарегистрирован и неделя не прошла — удаляем кнопку
+            document.getElementById('regSection').style.display = 'none';
+            // Обновляем дату входа, чтобы продлить доступ еще на неделю
+            localStorage.setItem('lastLogin', now.toString());
+        } else {
+            // Если прошла неделя — заставляем регистрироваться заново
+            localStorage.removeItem('isRegistered');
+        }
+    }
+})();
+</script>
 <!-- Регистрация -->
 <div id="login">
   <h2>Регистрация</h2>
@@ -1564,6 +1588,7 @@ localStorage.setItem("gameVersion", GAME_VERSION);
 
 })();
 }
+alert("Привет! Это уведомление");
 </script>
 
 </body>
