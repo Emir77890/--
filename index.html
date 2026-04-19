@@ -340,7 +340,7 @@ to{transform:translate(-50%,0);opacity:1;}
 <div class="moon" id="moon"></div>
 <div class="tasbih" id="tasbih"></div>
 <div class="mini-greeting" id="ramadanGreeting">
-   Регистрацию проходим 1 раз!
+   Добро пожаловать!
 </div>
 
 <script>
@@ -438,39 +438,47 @@ fetch('http://localhost:3000/register', {
   })
 });
 
-</script>
-
-
-<div id="regSection">
-    <button onclick="window.location.href='pamel.html'">Регистрация</button> 
-</div>
-
-<script>
-(function() {
-    const isRegistered = localStorage.getItem('isRegistered');
-    const lastLogin = localStorage.getItem('lastLogin');
-    const now = Date.now();
-    const week = 7 * 24 * 60 * 60 * 1000; // 7 дней
-
-    if (isRegistered === 'true' && lastLogin) {
-        if (now - parseInt(lastLogin) < week) {
-            // Если зарегистрирован и неделя не прошла — удаляем кнопку
-            document.getElementById('regSection').style.display = 'none';
-            // Обновляем дату входа, чтобы продлить доступ еще на неделю
-            localStorage.setItem('lastLogin', now.toString());
-        } else {
-            // Если прошла неделя — заставляем регистрироваться заново
-            localStorage.removeItem('isRegistered');
-        }
-    }
-})();
+</script>    
+();
 </script>
 <!-- Регистрация -->
 <div id="login">
-  <h2>Регистрация</h2>
+  
 
-  <input id="nickInput" placeholder="Ник"><br><br>
-  <input id="emailInput" placeholder="Email"><br><br>
+  <!-- modify this form HTML and place wherever you want your form -->
+
+<div class="box">
+  <h2>Регистрация</h2>
+  <input type="text" id="login" placeholder="Логин">
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Пароль">
+  <button onclick="register()">Создать аккаунт</button>
+</div>
+
+<script>
+function register() {
+  let login = document.getElementById("login").value;
+  let email = document.getElementById("email").value;
+  let password = document.getElementById("password").value;
+
+  if (!login || !email || !password) {
+    alert("Заполни все поля!");
+    return;
+  }
+
+  let user = {
+    login: login,
+    email: email,
+    password: password
+  };
+
+  localStorage.setItem("user", JSON.stringify(user));
+
+  alert("Регистрация сохранена!");
+}
+</script>
+
+
 
   <button onclick="register()">Играть</button>
 </div>
@@ -518,6 +526,77 @@ async function register() {
  <button><a href="ii.html">Драка с боссом</a></button>
  <button> <a href="tyf.html">Игра снайпер</a></button>
    <button><a href="оо.html">Космический летчик</a></button>
+   <!-- КНОПКА ОТКРЫТИЯ -->
+<button onclick="openDev()" style="position:fixed;top:10px;right:10px;z-index:9999;">
+⚙️
+</button>
+
+<!-- ОКНО ВВОДА ПАРОЛЯ -->
+<div id="devLogin" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#0f0;z-index:10000;text-align:center;padding-top:200px;">
+    <h2>Вход в Dev Panel</h2>
+    <input type="password" id="devPass" placeholder="Пароль">
+    <br><br>
+    <button onclick="checkPass()">Войти</button>
+</div>
+
+<!-- ПАНЕЛЬ -->
+<div id="devPanel" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#050505;color:#00ff41;z-index:10001;padding:20px;font-family:monospace;">
+    
+    <h2>DEV PANEL</h2>
+
+    <textarea id="devText" placeholder="Пиши что хочешь..." style="width:100%;height:100px;"></textarea>
+    <br><br>
+    <button onclick="saveText()">Сохранить</button>
+    <button onclick="closeDev()">Закрыть</button>
+
+    <h3>История:</h3>
+    <div id="devLog" style="max-height:200px;overflow:auto;border:1px solid #0f0;padding:10px;"></div>
+</div>
+
+<script>
+const DEV_PASSWORD = "12345"; // ← поменяй
+
+function openDev() {
+    document.getElementById("devLogin").style.display = "block";
+}
+
+function checkPass() {
+    const pass = document.getElementById("devPass").value;
+
+    if (pass === DEV_PASSWORD) {
+        document.getElementById("devLogin").style.display = "none";
+        document.getElementById("devPanel").style.display = "block";
+        loadLog();
+    } else {
+        alert("Неверный пароль");
+    }
+}
+
+function closeDev() {
+    document.getElementById("devPanel").style.display = "none";
+}
+
+function saveText() {
+    const text = document.getElementById("devText").value;
+    if (!text) return;
+
+    let logs = JSON.parse(localStorage.getItem("devLogs")) || [];
+    logs.push(text);
+
+    localStorage.setItem("devLogs", JSON.stringify(logs));
+
+    document.getElementById("devText").value = "";
+    loadLog();
+}
+
+function loadLog() {
+    let logs = JSON.parse(localStorage.getItem("devLogs")) || [];
+    const logDiv = document.getElementById("devLog");
+
+    logDiv.innerHTML = logs.map(t => `<div>> ${t}</div>`).join("");
+}
+</script>
+
 <div id="miniIphone">
 <div class="mini-phone">
 <div style="width:60px;height:6px;background:#555;border-radius:3px;margin-bottom:10px;"></div>
@@ -874,170 +953,10 @@ function lockScreen(reason) {
 </ul>
 <button onclick="back()">Назад</button>
 </div>
-<!--Разработчик-->
-<div id="admin">
-<h2>🛠 Панель разработчика</h2>
 
-<div style="background:#111;padding:15px;border-radius:12px;">
-  <input id="aLogin" placeholder="Логин">
-  <input id="aPass" type="password" placeholder="Пароль">
-  <button onclick="loginAdmin()">Войти</button>
-</div>
-
-<hr>
-
-<div style="margin-top:10px;">
-  <button onclick="loadUsers()">🔄 Обновить</button>
-</div>
-
-<div id="usersList"></div>
-
-<button onclick="back()">⬅ Назад</button>
-</div>
-
-<script>
-let token = "";
-
-// вход
-async function loginAdmin() {
-  const res = await fetch("http://localhost:3000/admin/login", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      login: document.getElementById("aLogin").value,
-      password: document.getElementById("aPass").value
-    })
-  });
-
-  const data = await res.json();
-
-  if (!data.token) {
-    alert("❌ Неверный логин или пароль");
-    return;
-  }
-
-  token = data.token;
-  alert("✅ Вход выполнен");
-  loadUsers();
-}
-
-// загрузка игроков
-async function loadUsers() {
-  const res = await fetch("http://localhost:3000/admin/users", {
-    headers: { authorization: token }
-  });
-
-  const users = await res.json();
-
-  const list = document.getElementById("usersList");
-  list.innerHTML = "";
-
-  users.reverse().forEach(u => {
-    list.innerHTML += `
-      <div style="
-        background:#1a1a1a;
-        margin:8px;
-        padding:10px;
-        border-radius:10px;
-        box-shadow:0 0 10px #000;
-      ">
-        👤 <b>${u.nick}</b><br>
-        📧 ${u.email}<br>
-        🌐 IP: ${u.ip}<br>
-        🕒 ${u.date}<br>
-        🚫 Статус: ${u.banned ? "BAN" : "OK"}<br><br>
-
-        <button onclick="ban('${u.email}')">🚫 Бан</button>
-      </div>
-    `;
-  });
-}
-
-// бан
-async function ban(email) {
-  await fetch("http://localhost:3000/admin/ban", {
-    method: "POST",
-    headers: {
-      "Content-Type":"application/json"
-    },
-    body: JSON.stringify({ email })
-  });
-
-  loadUsers();
-}
 </script>
 <!-- Разраб панель-->
- <!-- КНОПКА ОТКРЫТИЯ -->
-<button onclick="openDev()" style="position:fixed;top:10px;right:10px;z-index:9999;">
-⚙️
-</button>
-
-<!-- ОКНО ВВОДА ПАРОЛЯ -->
-<div id="devLogin" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#0f0;z-index:10000;text-align:center;padding-top:200px;">
-    <h2>Вход в Dev Panel</h2>
-    <input type="password" id="devPass" placeholder="Пароль">
-    <br><br>
-    <button onclick="checkPass()">Войти</button>
-</div>
-
-<!-- ПАНЕЛЬ -->
-<div id="devPanel" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#050505;color:#00ff41;z-index:10001;padding:20px;font-family:monospace;">
-    
-    <h2>DEV PANEL</h2>
-
-    <textarea id="devText" placeholder="Пиши что хочешь..." style="width:100%;height:100px;"></textarea>
-    <br><br>
-    <button onclick="saveText()">Сохранить</button>
-    <button onclick="closeDev()">Закрыть</button>
-
-    <h3>История:</h3>
-    <div id="devLog" style="max-height:200px;overflow:auto;border:1px solid #0f0;padding:10px;"></div>
-</div>
-
-<script>
-const DEV_PASSWORD = "12345"; // ← поменяй
-
-function openDev() {
-    document.getElementById("devLogin").style.display = "block";
-}
-
-function checkPass() {
-    const pass = document.getElementById("devPass").value;
-
-    if (pass === DEV_PASSWORD) {
-        document.getElementById("devLogin").style.display = "none";
-        document.getElementById("devPanel").style.display = "block";
-        loadLog();
-    } else {
-        alert("Неверный пароль");
-    }
-}
-
-function closeDev() {
-    document.getElementById("devPanel").style.display = "none";
-}
-
-function saveText() {
-    const text = document.getElementById("devText").value;
-    if (!text) return;
-
-    let logs = JSON.parse(localStorage.getItem("devLogs")) || [];
-    logs.push(text);
-
-    localStorage.setItem("devLogs", JSON.stringify(logs));
-
-    document.getElementById("devText").value = "";
-    loadLog();
-}
-
-function loadLog() {
-    let logs = JSON.parse(localStorage.getItem("devLogs")) || [];
-    const logDiv = document.getElementById("devLog");
-
-    logDiv.innerHTML = logs.map(t => `<div>> ${t}</div>`).join("");
-}
-</script>
-<!-- Админка -->
+ <!-- Админка -->
 <div id="admin">
 <h2>🔧 Админ-панель</h2>
 <script>
