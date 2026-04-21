@@ -432,6 +432,7 @@ fetch('http://localhost:3000/register', {
   headers: {
     'Content-Type': 'application/json'
   },
+
   body: JSON.stringify({
     nickname: "Test",
     email: "test@mail.com"
@@ -443,38 +444,7 @@ fetch('http://localhost:3000/register', {
 </script>
 <!-- Регистрация -->
 <div id="login">
-  
-
-  <!-- modify this form HTML and place wherever you want your form -->
-
-
-
-<script>
-function register() {
-  let login = document.getElementById("login").value;
-  let email = document.getElementById("email").value;
-  let password = document.getElementById("password").value;
-
-  if (!login || !email || !password) {
-    alert("Заполни все поля!");
-    return;
-  }
-
-  let user = {
-    login: login,
-    email: email,
-    password: password
-  };
-
-  localStorage.setItem("user", JSON.stringify(user));
-
-  alert("Регистрация сохранена!");
-}
-</script>
-
-
-
-  <button onclick="register()">Играть</button>
+  <button onclick="openGame">Играть</button>
 </div>
 
 <script>
@@ -545,7 +515,28 @@ async function register() {
 
     <h3>История:</h3>
     <div id="devLog" style="max-height:200px;overflow:auto;border:1px solid #0f0;padding:10px;"></div>
-</div>
+<h2>Выдать админку</h2>
+
+<input type="text" id="adminIdInput" placeholder="Введите ID игрока">
+<button onclick="giveAdmin()">Выдать</button>
+
+<script>
+function giveAdmin() {
+    const id = document.getElementById("adminIdInput").value;
+
+    // сохраняем список админов
+    let admins = JSON.parse(localStorage.getItem("admins")) || [];
+
+    if (!admins.includes(id)) {
+        admins.push(id);
+        localStorage.setItem("admins", JSON.stringify(admins));
+        alert("Админка выдана!");
+    } else {
+        alert("Уже админ");
+    }
+}
+</script>
+  </div>
 
 <script>
 const DEV_PASSWORD = "12345"; // ← поменяй
@@ -926,6 +917,20 @@ function lockScreen(reason) {
 <!-- Профиль -->
 <div id="profile">
 <h2>Профиль</h2>
+<div>
+  <h3>Твой ID:</h3>
+  <p id="playerId"></p>
+</div>
+<script>
+// создаём ID если его нет
+if (!localStorage.getItem("player_id")) {
+    const id = "ID_" + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem("player_id", id);
+}
+
+// выводим ID
+document.getElementById("playerId").innerText = localStorage.getItem("player_id");
+</script>
 <p>💰 Золото: <span id="pGold">0</span></p>
 <p>⚔️ Сила: <span id="pPower">1</span></p>
 <p>🐾 Скин: <span id="pSkin">Нет</span></p>
@@ -953,6 +958,17 @@ function lockScreen(reason) {
  <!-- Админка -->
 <div id="admin">
 <h2>🔧 Админ-панель</h2>
+<script>
+setTimeout(() => {
+    const playerId = localStorage.getItem("player_id");
+    const admins = JSON.parse(localStorage.getItem("admins")) || [];
+
+    if (admins.includes(playerId)) {
+        document.getElementById("adminPanel").style.display = "block";
+        document.getElementById("noAccess").style.display = "none";
+    }
+}, 5000); // 5 секунд
+</script>
 <script>
 /* ===== СЧЁТЧИК ИГРОКОВ (БЕЗ СЕРВЕРА, ЧЕРЕЗ LOCAL + TAB) ===== */
 
@@ -1036,6 +1052,24 @@ function updateAdminStats() {
 // Запуск
 playerJoin();
 setInterval(updateAdminStats, 1000);
+</script>
+<div id="adminPanel" style="display:none;">
+  <h1>АДМИН ПАНЕЛЬ</h1>
+  <p>Ты админ 👍</p>
+</div>
+
+<div id="noAccess">
+  <h2>Нет доступа</h2>
+</div>
+
+<script>
+const player_Id = localStorage.getItem("player_id");
+const admins = JSON.parse(localStorage.getItem("admins")) || [];
+
+if (admins.includes(playerId)) {
+    document.getElementById("adminPanel").style.display = "block";
+    document.getElementById("noAccess").style.display = "none";
+}
 </script>
 <input id="adminGold" type="number" placeholder="Золото">
 <button onclick="setGold()">Установить золото</button><br>
